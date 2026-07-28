@@ -531,7 +531,7 @@ body {
                 <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
                     <span class="upload-icon">🎵</span>
                     <div class="upload-text">点击或拖拽上传图片</div>
-                    <div class="upload-hint">JPG / PNG，截图也可以</div>
+                    <div class="upload-hint">请上传思维导图、流程图、思维笔记截图</div>
                 </div>
                 <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFile(event)">
 
@@ -544,6 +544,27 @@ body {
                 <div class="preview-wrap" id="previewWrap" style="display:none;">
                     <img id="previewImg" src="" alt="预览">
                     <div class="preview-badge">已选择</div>
+                </div>
+
+                <!-- 样例放在上传区下发 -->
+                <div class="divider"></div>
+                <div class="form-label">没有图表？试试样例</div>
+                <div class="style-grid">
+                    <div class="style-card" onclick="loadSampleWithProcesson('mindmap')" style="border-color:rgba(255,107,157,0.3);">
+                        <span class="style-emoji">📊</span>
+                        <span class="style-name">思维导图样例</span>
+                    </div>
+                    <div class="style-card" onclick="loadSampleWithProcesson('flowchart')" style="border-color:rgba(108,92,231,0.3);">
+                        <span class="style-emoji">🔀</span>
+                        <span class="style-name">流程图样例</span>
+                    </div>
+                    <div class="style-card" onclick="loadSampleWithProcesson('notes')" style="border-color:rgba(0,210,255,0.3);">
+                        <span class="style-emoji">📝</span>
+                        <span class="style-name">思维笔记样例</span>
+                    </div>
+                </div>
+                <div style="text-align:center;margin-top:8px;">
+                    <a href="https://www.processon.com" target="_blank" style="font-size:11px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);">📎 没有图？去 ProcessOn 免费在线作图</a>
                 </div>
 
                 <div class="divider"></div>
@@ -586,26 +607,6 @@ body {
                         <span class="style-emoji">🍃</span>
                         <span class="style-name">治愈</span>
                     </div>
-                </div>
-
-                <div class="divider"></div>
-                <div class="form-label">没有图表？试试样例</div>
-                <div class="style-grid">
-                    <div class="style-card" onclick="loadSampleWithProcesson('flowchart')" style="border-color:rgba(108,92,231,0.3);">
-                        <span class="style-emoji">🔀</span>
-                        <span class="style-name">流程图样例</span>
-                    </div>
-                    <div class="style-card" onclick="loadSampleWithProcesson('mindmap')" style="border-color:rgba(255,107,157,0.3);">
-                        <span class="style-emoji">📊</span>
-                        <span class="style-name">思维导图样例</span>
-                    </div>
-                    <div class="style-card" onclick="loadSampleWithProcesson('notes')" style="border-color:rgba(0,210,255,0.3);">
-                        <span class="style-emoji">📝</span>
-                        <span class="style-name">思维笔记样例</span>
-                    </div>
-                </div>
-                <div style="text-align:center;margin-top:8px;">
-                    <a href="https://www.processon.com" target="_blank" style="font-size:11px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);">📎 没有图？去 ProcessOn 免费在线作图</a>
                 </div>
 
                 <div class="error-box" id="errorBox"></div>
