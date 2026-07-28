@@ -712,6 +712,7 @@ body {
 <script>
 // 图片加载后统一处理
 function onImageReady(dataUrl){
+    alert('image loaded: ' + dataUrl.substring(0, 30));
     document.getElementById('previewImg').src = dataUrl;
     document.getElementById('previewWrap').style.display = 'block';
     document.getElementById('generateBtn').disabled = false;
