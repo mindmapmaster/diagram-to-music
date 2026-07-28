@@ -588,6 +588,22 @@ body {
                     </div>
                 </div>
 
+                <div class="divider"></div>
+                <div class="form-label">没有图表？试试样例</div>
+                <div class="style-grid">
+                    <div class="style-card" onclick="loadSample('mindmap')" style="border-color:rgba(108,92,231,0.3);">
+                        <span class="style-emoji">📊</span>
+                        <span class="style-name">思维导图</span>
+                    </div>
+                    <div class="style-card" onclick="loadSample('flowchart')" style="border-color:rgba(0,210,255,0.3);">
+                        <span class="style-emoji">🔀</span>
+                        <span class="style-name">流程图</span>
+                    </div>
+                </div>
+                <div style="text-align:center;margin-top:8px;">
+                    <a href="https://www.processon.com" target="_blank" style="font-size:11px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);">📎 没有图？去 ProcessOn 免费在线作图</a>
+                </div>
+
                 <div class="error-box" id="errorBox"></div>
                 <button class="btn btn-primary" id="generateBtn" onclick="startGenerate()" disabled>
                     🎵 生成歌曲
