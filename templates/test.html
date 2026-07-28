@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Test</title>
+<style>
+body { background:#111; color:#fff; font-family:sans-serif; padding:20px; }
+.section { margin-bottom:30px; }
+.upload-box { border:2px dashed #666; padding:20px; cursor:pointer; border-radius:8px; text-align:center; }
+.upload-box.active { border-color:#10B981; }
+.sample-btn { display:inline-block; border:1px solid #444; padding:10px 16px; margin:4px; border-radius:8px; cursor:pointer; font-size:14px; }
+.sample-btn:hover { border-color:#A78BFA; }
+.preview { max-width:350px; display:none; margin-top:10px; border:1px solid #333; border-radius:8px; }
+.view-link { font-size:12px; color:#A78BFA; margin-top:4px; display:none; text-decoration:none; }
+.source-tag { font-size:11px; color:#10B981; margin-bottom:4px; }
+#sampleSection { transition: opacity 0.2s; }
+#sampleSection.hidden { opacity:0.3; pointer-events:none; }
+</style></head>
+<body>
+
+<div class="section">
+    <h3>1. 上传图片</h3>
+    <div class="upload-box" id="uploadBox" onclick="document.getElementById('f').click()">
+        点击上传<br><span style="font-size:12px;color:#888;">或 Ctrl/Cmd+V 粘贴 • <a href="#" onclick="event.preventDefault();event.stopPropagation();pasteImage()" style="color:#A78BFA;">📋 粘贴图片</a></span>
+    </div>
+    <input type="file" id="f" accept="image/*" onchange="handleFile(event)" style="display:none;">
+    <div id="uploadResult" style="display:none;">
+        <div class="source-tag">✅ 已上传 <span style="color:#FF6B9D;cursor:pointer;margin-left:10px;" onclick="resetUpload()">✕ 清除</span></div>
+        <img id="uploadPreview" class="preview" style="display:block;">
+    </div>
+</div>
+
+<div class="section" id="sampleSection">
+    <h3>2. 或直接试用</h3>
+    <div class="sample-btn" onclick="loadSample('mindmap')">📊 思维导图</div>
+    <div class="sample-btn" onclick="loadSample('flowchart')">🔀 流程图</div>
+    <div class="sample-btn" onclick="loadSample('notes')">📝 思维笔记</div>
+    <div id="sampleResult" style="display:none;">
+        <div class="source-tag">✅ 已选样例</div>
+        <img id="samplePreview" class="preview" style="display:block;">
+        <a id="sampleViewLink" class="view-link" target="_blank">📎 查看原图</a>
+    </div>
+</div>
+
+<script>
+const FILES = { mindmap:'/static/sample_mindmap.svg', flowchart:'/static/sample_flowchart.svg', notes:'/static/sample_notes.png' };
+const VIEWS = { mindmap:'https://www.processon.com/view/695b920c4e3bc00c5538c3ab', flowchart:'https://www.processon.com/view/69d761ce50f07d20c7ecb978', notes:'https://www.processon.com/view/62f1fcc5f346fb49413cbb96' };
+
+function resetUpload() {
+    document.getElementById('uploadResult').style.display = 'none';
+    document.getElementById('uploadBox').classList.remove('active');
+    document.getElementById('sampleSection').classList.remove('hidden');
+    document.getElementById('f').value = '';
+}
+
+// 快捷键粘贴
+document.addEventListener('paste', e => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+        if (item.type.startsWith('image/')) {
+            e.preventDefault();
+            processFile(item.getAsFile());
+            return;
+        }
+    }
+});
+
+// 点击粘贴按钮
+async function pasteImage() {
+    try {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+            const types = item.types;
+            for (const t of types) {
+                if (t.startsWith('image/')) {
+                    const blob = await item.getType(t);
+                    processFile(blob);
+                    return;
+                }
+            }
+        }
+        alert('剪贴板中没有图片，请先截图或复制图片');
+    } catch(e) {
+        alert('请使用快捷键 Ctrl+V (Mac: Cmd+V) 直接粘贴');
+    }
+}
+
+function processFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        document.getElementById('uploadPreview').src = ev.target.result;
+        document.getElementById('uploadResult').style.display = 'block';
+        document.getElementById('uploadBox').classList.add('active');
+        document.getElementById('sampleSection').classList.add('hidden');
+        document.getElementById('sampleResult').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    processFile(file);
+}
+
+async function loadSample(type) {
+    const resp = await fetch(FILES[type]);
+    const blob = await resp.blob();
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        document.getElementById('samplePreview').src = ev.target.result;
+        document.getElementById('sampleResult').style.display = 'block';
+        const link = document.getElementById('sampleViewLink');
+        link.href = VIEWS[type];
+        link.style.display = 'inline-block';
+        // 二选一：重置上传
+        document.getElementById('uploadResult').style.display = 'none';
+        document.getElementById('uploadBox').classList.remove('active');
+        document.getElementById('sampleSection').classList.remove('hidden');
+    };
+    reader.readAsDataURL(blob);
+}
+</script>
+</body>
+</html>

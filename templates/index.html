@@ -542,32 +542,34 @@ body {
                 </div>
                 <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
                     <span class="upload-icon">🎵</span>
-                    <div class="upload-text" id="uploadText">点击、拖拽或快捷键粘贴图片</div>
-                    <div class="upload-hint">支持思维导图、流程图、思维笔记截图</div>
+                    <div class="upload-text" id="uploadText">点击、拖拽或 Ctrl/Cmd+V 粘贴图片</div>
+                    <div class="upload-hint">支持思维导图、流程图、思维笔记截图 • <span onclick="event.stopPropagation();pasteImage()" style="color:var(--primary);cursor:pointer;text-decoration:underline;">📋 粘贴图片</span></div>
                 </div>
-                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFile(event)">
+                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleUpload(event)">
 
                 <div class="preview-wrap" id="previewWrap" style="display:none;">
                     <img id="previewImg" src="" alt="预览">
-                    <div class="preview-badge">已选择</div>
+                    <div class="preview-badge" id="previewBadge" style="display:flex;align-items:center;gap:8px;">
+                        已选择 <span onclick="resetUpload()" style="cursor:pointer;font-weight:400;opacity:0.7;font-size:10px;">✕ 清除</span>
+                    </div>
                 </div>
 
                 <div style="text-align:center;margin-top:10px;">
                     <a href="https://www.processon.com" target="_blank" style="font-size:11px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);">📎 没有图？点击去 ProcessOn 免费在线作图 →</a>
                 </div>
 
-                <div style="margin-top:10px;">
+                <div style="margin-top:10px;" id="sampleSection">
                     <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">直接试用</span>
                     <div class="style-grid" style="margin-top:6px;">
-                        <div class="style-card sample-card-btn" data-sample="mindmap" onclick="loadSampleWithProcesson('mindmap')">
+                        <div class="style-card sample-card-btn" onclick="loadSampleWithProcesson('mindmap')">
                             <span class="style-emoji">📊</span>
                             <span class="style-name">思维导图</span>
                         </div>
-                        <div class="style-card sample-card-btn" data-sample="flowchart" onclick="loadSampleWithProcesson('flowchart')">
+                        <div class="style-card sample-card-btn" onclick="loadSampleWithProcesson('flowchart')">
                             <span class="style-emoji">🔀</span>
                             <span class="style-name">流程图</span>
                         </div>
-                        <div class="style-card sample-card-btn" data-sample="notes" onclick="loadSampleWithProcesson('notes')">
+                        <div class="style-card sample-card-btn" onclick="loadSampleWithProcesson('notes')">
                             <span class="style-emoji">📝</span>
                             <span class="style-name">思维笔记</span>
                         </div>
@@ -620,7 +622,7 @@ body {
                     </div>
                 </div>
 
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;margin-top:8px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;margin-top:16px;">
                     <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">3</span>
                     <span style="font-size:12px;font-weight:600;color:var(--text);">生成歌曲</span>
                 </div>
@@ -727,14 +729,14 @@ document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(card => {
 });
 
 // 上传
-document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+document.getElementById('fileInput').addEventListener('change', handleUpload);
 const uploadZone = document.getElementById('uploadZone');
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
 uploadZone.addEventListener('drop', e => {
     e.preventDefault();
     uploadZone.classList.remove('dragover');
-    if (e.dataTransfer.files.length) handleFileSelect({ target: e.dataTransfer });
+    if (e.dataTransfer.files.length) processUploadedImage(e.dataTransfer.files[0]);
 });
 
 // 快捷键粘贴图片（Mac: Cmd+V, Win: Ctrl+V）
@@ -744,21 +746,39 @@ const pasteHandler = e => {
         if (item.type.startsWith('image/')) {
             e.preventDefault();
             e.stopPropagation();
-            handleFileSelect({ target: { files: [item.getAsFile()] } });
+            processUploadedImage(item.getAsFile());
             return;
         }
     }
 };
-// 上传框直接聚焦时也能粘贴
 uploadZone.addEventListener('paste', pasteHandler);
-// 全局粘贴兜底
 document.addEventListener('paste', pasteHandler);
 
-function handleFile(e) { handleFileSelect({ target: e.target }); }
+async function pasteImage() {
+    try {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+            for (const t of item.types) {
+                if (t.startsWith('image/')) {
+                    const blob = await item.getType(t);
+                    processUploadedImage(blob);
+                    return;
+                }
+            }
+        }
+        alert('剪贴板中没有图片');
+    } catch(e) {
+        alert('请使用 Ctrl+V (Mac: Cmd+V) 直接粘贴图片');
+    }
+}
 
-function handleFileSelect(e) {
-    const file = e.target.files[0] || (e.dataTransfer && e.dataTransfer.files[0]);
+function handleUpload(e) {
+    const file = e.target.files[0];
     if (!file) return;
+    processUploadedImage(file);
+}
+
+function processUploadedImage(file) {
     if (!file.type.startsWith('image/')) { showError('请上传图片文件'); return; }
     const reader = new FileReader();
     reader.onload = function(ev) {
@@ -766,10 +786,28 @@ function handleFileSelect(e) {
         document.getElementById('previewImg').src = imageBase64;
         document.getElementById('previewWrap').style.display = 'block';
         document.getElementById('generateBtn').disabled = false;
-        document.getElementById('uploadText').textContent = '点击、拖拽或快捷键粘贴图片';
+        document.getElementById('uploadText').textContent = '已上传图片';
         document.getElementById('uploadText').style.color = '';
+        // 二选一：灰掉直接试用
+        document.getElementById('sampleSection').style.opacity = '0.3';
+        document.getElementById('sampleSection').style.pointerEvents = 'none';
         hideError();
     };
+    reader.readAsDataURL(file);
+}
+
+function resetUpload() {
+    imageBase64 = null;
+    document.getElementById('previewImg').src = '';
+    document.getElementById('previewWrap').style.display = 'none';
+    document.getElementById('generateBtn').disabled = true;
+    document.getElementById('uploadText').textContent = '点击、拖拽或 Ctrl/Cmd+V 粘贴图片';
+    document.getElementById('uploadText').style.color = '';
+    document.getElementById('sampleSection').style.opacity = '1';
+    document.getElementById('sampleSection').style.pointerEvents = 'auto';
+    document.getElementById('fileInput').value = '';
+    forceMode = false;
+}
     reader.readAsDataURL(file);
 }
 
@@ -969,6 +1007,10 @@ async function loadSampleWithProcesson(type) {
         const names = {mindmap:'思维导图', flowchart:'流程图', notes:'思维笔记'};
         document.getElementById('uploadText').textContent = '已加载：' + (names[type] || '') + '样例';
         document.getElementById('uploadText').style.color = '#10B981';
+        // 二选一：保持直接试用可用
+        document.getElementById('sampleSection').style.opacity = '1';
+        document.getElementById('sampleSection').style.pointerEvents = 'auto';
+        document.getElementById('fileInput').value = '';
         // 清除旧的查看原图链接
         const oldLink = document.getElementById('viewLink');
         if (oldLink) oldLink.remove();

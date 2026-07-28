@@ -231,6 +231,10 @@ def validate_image():
     return jsonify({"valid": True})  # 校验失败也放过，不阻塞用户
 
 
+@app.route("/test")
+def test_page():
+    return render_template("test.html")
+
 @app.route("/")
 def index():
     return render_template("index.html")
