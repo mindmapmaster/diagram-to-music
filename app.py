@@ -9,6 +9,14 @@ import time
 import requests
 from flask import Flask, request, jsonify, render_template
 
+# PythonAnywhere 免费版代理配置
+_session = requests.Session()
+if "PYTHONANYWHERE_DOMAIN" in os.environ or os.path.exists("/home"):
+    _session.proxies = {
+        "http": "http://proxy.server:3128",
+        "https": "http://proxy.server:3128",
+    }
+
 try:
     from config import MINIMAX_API_KEY, MINIMAX_API_URL, MINIMAX_MODEL, ZHIPU_API_KEY, ZHIPU_BASE_URL, ZHIPU_MODEL
 except ImportError:
@@ -83,7 +91,7 @@ def call_zhipu(image_base64: str, img_type: str, music_style_tag: str) -> dict:
 
     for attempt in range(3):
         try:
-            resp = requests.post(
+            resp = _session.post(
                 f"{ZHIPU_BASE_URL}/chat/completions",
                 headers={"Authorization": f"Bearer {ZHIPU_API_KEY}", "Content-Type": "application/json"},
                 json=payload,
@@ -226,7 +234,7 @@ def song_download():
     if not mp3_url:
         return jsonify({"error": "缺少 url 参数"}), 400
 
-    resp = requests.get(mp3_url, timeout=60)
+    resp = _session.get(mp3_url, timeout=60)
     return resp.content, 200, {
         "Content-Type": "audio/mpeg",
         "Content-Disposition": "attachment; filename=song.mp3",
