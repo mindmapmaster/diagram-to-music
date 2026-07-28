@@ -559,15 +559,15 @@ body {
                 <div style="margin-top:10px;">
                     <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">直接试用</span>
                     <div class="style-grid" style="margin-top:6px;">
-                        <div class="style-card sample-card-btn" data-sample="mindmap">
+                        <div class="style-card sample-card-btn" data-sample="mindmap" onclick="loadSampleWithProcesson('mindmap')">
                             <span class="style-emoji">📊</span>
                             <span class="style-name">思维导图</span>
                         </div>
-                        <div class="style-card sample-card-btn" data-sample="flowchart">
+                        <div class="style-card sample-card-btn" data-sample="flowchart" onclick="loadSampleWithProcesson('flowchart')">
                             <span class="style-emoji">🔀</span>
                             <span class="style-name">流程图</span>
                         </div>
-                        <div class="style-card sample-card-btn" data-sample="notes">
+                        <div class="style-card sample-card-btn" data-sample="notes" onclick="loadSampleWithProcesson('notes')">
                             <span class="style-emoji">📝</span>
                             <span class="style-name">思维笔记</span>
                         </div>
@@ -723,15 +723,6 @@ document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(card => {
         document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(c => c.classList.remove('selected'));
         this.classList.add('selected');
         selectedMusicStyle = this.dataset.style;
-    });
-});
-
-// 样例卡片
-document.querySelectorAll('.sample-card-btn').forEach(card => {
-    console.log('binding sample card:', card.dataset.sample);
-    card.addEventListener('click', function() {
-        console.log('sample clicked:', this.dataset.sample);
-        loadSampleWithProcesson(this.dataset.sample);
     });
 });
 
