@@ -529,10 +529,13 @@ body {
             </div>
             <div class="card-body">
                 <!-- 步骤 1 -->
-                <div class="form-label">① 上传图表</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                    <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">1</span>
+                    <span style="font-size:12px;font-weight:600;color:var(--text);">上传图表</span>
+                </div>
                 <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
                     <span class="upload-icon">🎵</span>
-                    <div class="upload-text" id="uploadText">点击、拖拽或 Ctrl+V 粘贴图片</div>
+                    <div class="upload-text" id="uploadText">点击、拖拽或快捷键粘贴图片</div>
                     <div class="upload-hint">支持思维导图、流程图、思维笔记截图</div>
                 </div>
                 <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFile(event)">
@@ -542,10 +545,13 @@ body {
                     <div class="preview-badge">已选择</div>
                 </div>
 
-                <!-- 直接试用 -->
-                <div style="margin-top:12px;">
-                    <div class="form-label">直接试用</div>
-                    <div class="style-grid">
+                <div style="text-align:center;margin-top:10px;">
+                    <a href="https://www.processon.com" target="_blank" style="font-size:11px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);">📎 没有图？去 ProcessOn 免费在线作图</a>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">直接试用</span>
+                    <div class="style-grid" style="margin-top:6px;">
                         <div class="style-card" onclick="loadSampleWithProcesson('mindmap')" style="border-color:rgba(255,107,157,0.3);">
                             <span class="style-emoji">📊</span>
                             <span class="style-name">思维导图</span>
@@ -559,15 +565,15 @@ body {
                             <span class="style-name">思维笔记</span>
                         </div>
                     </div>
-                    <div style="text-align:center;margin-top:8px;">
-                        <a href="https://www.processon.com" target="_blank" style="font-size:11px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);">📎 去 ProcessOn 免费作图</a>
-                    </div>
                 </div>
 
                 <div class="divider"></div>
 
                 <!-- 步骤 2 -->
-                <div class="form-label">② 选择曲风</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                    <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">2</span>
+                    <span style="font-size:12px;font-weight:600;color:var(--text);">选择曲风</span>
+                </div>
                 <div class="style-grid">
                     <div class="style-card selected" data-style="pop">
                         <span class="style-emoji">🎤</span>
@@ -719,19 +725,20 @@ uploadZone.addEventListener('drop', e => {
     if (e.dataTransfer.files.length) handleFileSelect({ target: e.dataTransfer });
 });
 
-// Ctrl+V 粘贴图片
+// 快捷键粘贴图片
 document.addEventListener('paste', e => {
     const items = e.clipboardData?.items;
     if (!items) return;
     for (const item of items) {
         if (item.type.startsWith('image/')) {
             e.preventDefault();
-            const file = item.getAsFile();
-            handleFileSelect({ target: { files: [file] } });
+            handleFileSelect({ target: { files: [item.getAsFile()] } });
             return;
         }
     }
 });
+// 阻止上传框 onclick 在粘贴时触发
+uploadZone.addEventListener('paste', e => e.stopPropagation());
 
 function handleFile(e) { handleFileSelect({ target: e.target }); }
 
@@ -745,7 +752,7 @@ function handleFileSelect(e) {
         document.getElementById('previewImg').src = imageBase64;
         document.getElementById('previewWrap').style.display = 'block';
         document.getElementById('generateBtn').disabled = false;
-        document.getElementById('uploadText').textContent = '点击、拖拽或 Ctrl+V 粘贴图片';
+        document.getElementById('uploadText').textContent = '点击、拖拽或快捷键粘贴图片';
         document.getElementById('uploadText').style.color = '';
         hideError();
     };
