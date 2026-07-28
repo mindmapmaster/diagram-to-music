@@ -524,52 +524,50 @@ body {
                 <div class="card-header-icon purple">📸</div>
                 <div class="card-header-text">
                     <h3>准备素材</h3>
-                    <p>上传图片，选择风格</p>
+                    <p>上传图片，AI 自动识别类型</p>
                 </div>
             </div>
             <div class="card-body">
+                <!-- 步骤 1 -->
+                <div class="form-label">① 上传图表</div>
                 <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
                     <span class="upload-icon">🎵</span>
-                    <div class="upload-text">点击或拖拽上传图片</div>
-                    <div class="upload-hint">请上传思维导图、流程图、思维笔记截图</div>
+                    <div class="upload-text" id="uploadText">点击、拖拽或 Ctrl+V 粘贴图片</div>
+                    <div class="upload-hint">支持思维导图、流程图、思维笔记截图</div>
                 </div>
                 <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFile(event)">
-
-                <div class="type-row">
-                    <div class="type-btn selected" data-type="思维导图">📊 思维导图</div>
-                    <div class="type-btn" data-type="流程图">🔀 流程图</div>
-                    <div class="type-btn" data-type="思维笔记">📝 思维笔记</div>
-                </div>
 
                 <div class="preview-wrap" id="previewWrap" style="display:none;">
                     <img id="previewImg" src="" alt="预览">
                     <div class="preview-badge">已选择</div>
                 </div>
 
-                <!-- 样例放在上传区下发 -->
-                <div class="divider"></div>
-                <div class="form-label">没有图表？试试样例</div>
-                <div class="style-grid">
-                    <div class="style-card" onclick="loadSampleWithProcesson('mindmap')" style="border-color:rgba(255,107,157,0.3);">
-                        <span class="style-emoji">📊</span>
-                        <span class="style-name">思维导图样例</span>
+                <!-- 直接试用 -->
+                <div style="margin-top:12px;">
+                    <div class="form-label">直接试用</div>
+                    <div class="style-grid">
+                        <div class="style-card" onclick="loadSampleWithProcesson('mindmap')" style="border-color:rgba(255,107,157,0.3);">
+                            <span class="style-emoji">📊</span>
+                            <span class="style-name">思维导图</span>
+                        </div>
+                        <div class="style-card" onclick="loadSampleWithProcesson('flowchart')" style="border-color:rgba(108,92,231,0.3);">
+                            <span class="style-emoji">🔀</span>
+                            <span class="style-name">流程图</span>
+                        </div>
+                        <div class="style-card" onclick="loadSampleWithProcesson('notes')" style="border-color:rgba(0,210,255,0.3);">
+                            <span class="style-emoji">📝</span>
+                            <span class="style-name">思维笔记</span>
+                        </div>
                     </div>
-                    <div class="style-card" onclick="loadSampleWithProcesson('flowchart')" style="border-color:rgba(108,92,231,0.3);">
-                        <span class="style-emoji">🔀</span>
-                        <span class="style-name">流程图样例</span>
+                    <div style="text-align:center;margin-top:8px;">
+                        <a href="https://www.processon.com" target="_blank" style="font-size:11px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);">📎 去 ProcessOn 免费作图</a>
                     </div>
-                    <div class="style-card" onclick="loadSampleWithProcesson('notes')" style="border-color:rgba(0,210,255,0.3);">
-                        <span class="style-emoji">📝</span>
-                        <span class="style-name">思维笔记样例</span>
-                    </div>
-                </div>
-                <div style="text-align:center;margin-top:8px;">
-                    <a href="https://www.processon.com" target="_blank" style="font-size:11px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);">📎 没有图？去 ProcessOn 免费在线作图</a>
                 </div>
 
                 <div class="divider"></div>
 
-                <div class="form-label">选择曲风</div>
+                <!-- 步骤 2 -->
+                <div class="form-label">② 选择曲风</div>
                 <div class="style-grid">
                     <div class="style-card selected" data-style="pop">
                         <span class="style-emoji">🎤</span>
@@ -609,6 +607,7 @@ body {
                     </div>
                 </div>
 
+                <div class="form-label">③ 生成歌曲</div>
                 <div class="error-box" id="errorBox"></div>
                 <button class="btn btn-primary" id="generateBtn" onclick="startGenerate()" disabled>
                     🎵 生成歌曲
@@ -700,16 +699,7 @@ let selectedImgType = '思维导图';
 let selectedMusicStyle = 'pop';
 let currentMp3Url = null;
 
-// 图片类型
-document.querySelectorAll('.type-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
-        this.classList.add('selected');
-        selectedImgType = this.dataset.type;
-    });
-});
-
-// 曲风
+let selectedImgType = '图表';  // AI 自动识别，不再让用户选// 曲风
 document.querySelectorAll('.style-card').forEach(card => {
     card.addEventListener('click', function() {
         document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
@@ -729,6 +719,20 @@ uploadZone.addEventListener('drop', e => {
     if (e.dataTransfer.files.length) handleFileSelect({ target: e.dataTransfer });
 });
 
+// Ctrl+V 粘贴图片
+document.addEventListener('paste', e => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+        if (item.type.startsWith('image/')) {
+            e.preventDefault();
+            const file = item.getAsFile();
+            handleFileSelect({ target: { files: [file] } });
+            return;
+        }
+    }
+});
+
 function handleFile(e) { handleFileSelect({ target: e.target }); }
 
 function handleFileSelect(e) {
@@ -741,6 +745,8 @@ function handleFileSelect(e) {
         document.getElementById('previewImg').src = imageBase64;
         document.getElementById('previewWrap').style.display = 'block';
         document.getElementById('generateBtn').disabled = false;
+        document.getElementById('uploadText').textContent = '点击、拖拽或 Ctrl+V 粘贴图片';
+        document.getElementById('uploadText').style.color = '';
         hideError();
     };
     reader.readAsDataURL(file);
@@ -938,6 +944,10 @@ async function loadSampleWithProcesson(type) {
         document.getElementById('previewImg').src = imageBase64;
         document.getElementById('previewWrap').style.display = 'block';
         document.getElementById('generateBtn').disabled = false;
+        // 更新上传框提示
+        const names = {mindmap:'思维导图', flowchart:'流程图', notes:'思维笔记'};
+        document.getElementById('uploadText').textContent = '已加载：' + (names[type] || '') + '样例';
+        document.getElementById('uploadText').style.color = '#10B981';
         // 清除旧的查看原图链接
         const oldLink = document.getElementById('viewLink');
         if (oldLink) oldLink.remove();
@@ -946,10 +956,7 @@ async function loadSampleWithProcesson(type) {
                 <a href="${sample.view}" target="_blank" style="color:white;text-decoration:none;" onclick="event.stopPropagation()">📎 查看原图</a>
             </div>`);
 
-        if (sample.imgType) {
-            document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('selected', b.dataset.type === sample.imgType));
-            selectedImgType = sample.imgType;
-        }
+        if (sample.imgType) selectedImgType = sample.imgType;
         document.getElementById('validateModal').style.display = 'none';
         forceMode = true;
     };
