@@ -552,15 +552,15 @@ body {
                 <div style="margin-top:10px;">
                     <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">直接试用</span>
                     <div class="style-grid" style="margin-top:6px;">
-                        <div class="style-card" onclick="loadSampleWithProcesson('mindmap')" style="border-color:rgba(255,107,157,0.3);">
+                        <div class="style-card sample-card-btn" data-sample="mindmap" style="border-color:rgba(255,107,157,0.3);">
                             <span class="style-emoji">📊</span>
                             <span class="style-name">思维导图</span>
                         </div>
-                        <div class="style-card" onclick="loadSampleWithProcesson('flowchart')" style="border-color:rgba(108,92,231,0.3);">
+                        <div class="style-card sample-card-btn" data-sample="flowchart" style="border-color:rgba(108,92,231,0.3);">
                             <span class="style-emoji">🔀</span>
                             <span class="style-name">流程图</span>
                         </div>
-                        <div class="style-card" onclick="loadSampleWithProcesson('notes')" style="border-color:rgba(0,210,255,0.3);">
+                        <div class="style-card sample-card-btn" data-sample="notes" style="border-color:rgba(0,210,255,0.3);">
                             <span class="style-emoji">📝</span>
                             <span class="style-name">思维笔记</span>
                         </div>
@@ -708,12 +708,21 @@ let selectedImgType = '图表';
 let selectedMusicStyle = '';
 let currentMp3Url = null;
 
-let selectedImgType = '图表';  // AI 自动识别，不再让用户选// 曲风
-document.querySelectorAll('.style-card').forEach(card => {
+let selectedImgType = '图表';  // AI 自动识别，不再让用户选
+
+// 曲风选择
+document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(card => {
     card.addEventListener('click', function() {
-        document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+        document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(c => c.classList.remove('selected'));
         this.classList.add('selected');
         selectedMusicStyle = this.dataset.style;
+    });
+});
+
+// 样例卡片
+document.querySelectorAll('.sample-card-btn').forEach(card => {
+    card.addEventListener('click', function() {
+        loadSampleWithProcesson(this.dataset.sample);
     });
 });
 
