@@ -456,6 +456,37 @@ body {
     .card-header { padding: 14px 14px 10px; }
     .style-grid { grid-template-columns: 1fr 1fr 1fr; }
 }
+
+/* ====== 弹窗 ====== */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+.modal-box {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 32px 28px;
+    max-width: 440px; width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.modal-icon { font-size: 44px; margin-bottom: 12px; }
+.modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.modal-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
+.modal-actions { display: flex; flex-direction: column; gap: 8px; }
+.sample-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.sample-card {
+    padding: 12px; border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm); cursor: pointer;
+    background: var(--surface); transition: var(--transition); text-align: center;
+}
+.sample-card:hover { border-color: var(--primary); background: rgba(108,92,231,0.08); }
+.sample-card-icon { font-size: 28px; display: block; margin-bottom: 4px; }
+.sample-card-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
 </style>
 </head>
 <body>
@@ -733,9 +764,55 @@ function toggleVisualizer(playing) {
 }
 
 // 生成
+// 验证图片是否为图表类型
+let forceMode = false;
+let pendingBlob = null;
+
 async function startGenerate() {
     if (!imageBase64) { showError('请先上传图片'); return; }
     hideError();
+
+    if (!forceMode) {
+        const btn = document.getElementById('generateBtn');
+        btn.disabled = true;
+        btn.textContent = '🔍 检测图片类型...';
+
+        const formData = new FormData();
+        const blob = await (await fetch(imageBase64)).blob();
+        formData.append('image', blob, 'upload.png');
+
+        try {
+            const resp = await fetch('/api/validate', { method: 'POST', body: formData });
+            const data = await resp.json();
+
+            if (!data.valid) {
+                pendingBlob = blob;
+                document.getElementById('validateModal').style.display = 'flex';
+                btn.disabled = false;
+                btn.textContent = '🎵 生成歌曲';
+                return;
+            }
+        } catch(e) {
+            // 校验挂了就跳过，直接生成
+        }
+        pendingBlob = blob;
+    }
+
+    doGenerate();
+}
+
+function closeModal() {
+    document.getElementById('validateModal').style.display = 'none';
+    forceMode = false;
+}
+
+function forceGenerate() {
+    document.getElementById('validateModal').style.display = 'none';
+    forceMode = true;
+    doGenerate();
+}
+
+async function doGenerate() {
     const btn = document.getElementById('generateBtn');
     btn.disabled = true;
     btn.textContent = '⏳ AI 分析中...';
@@ -750,7 +827,8 @@ async function startGenerate() {
     document.getElementById('audioStatus').textContent = '生成中...';
 
     const formData = new FormData();
-    const blob = await (await fetch(imageBase64)).blob();
+    const blob = pendingBlob || await (await fetch(imageBase64)).blob();
+    pendingBlob = null;
     formData.append('image', blob, 'upload.png');
     formData.append('img_type', selectedImgType);
     formData.append('music_style', selectedMusicStyle);
@@ -806,6 +884,25 @@ function downloadSong() {
     if (currentMp3Url) window.open('/api/song/download?url=' + encodeURIComponent(currentMp3Url), '_blank');
 }
 
+// 内置样例图片
+const SAMPLES = {
+    mindmap: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="#F7F9FC"/><rect x="230" y="150" width="140" height="40" rx="8" fill="#1A6FF5"/><text x="300" y="175" text-anchor="middle" fill="white" font-size="14" font-family="sans-serif">核心主题</text><line x1="300" y1="190" x2="300" y2="220" stroke="#1A6FF5" stroke-width="3"/><rect x="80" y="220" width="130" height="36" rx="8" fill="#EDF4FF" stroke="#1A6FF5" stroke-width="2"/><text x="145" y="242" text-anchor="middle" fill="#1D2129" font-size="13" font-family="sans-serif">子主题 A</text><rect x="240" y="220" width="130" height="36" rx="8" fill="#EDF4FF" stroke="#1A6FF5" stroke-width="2"/><text x="305" y="242" text-anchor="middle" fill="#1D2129" font-size="13" font-family="sans-serif">子主题 B</text><rect x="390" y="220" width="130" height="36" rx="8" fill="#EDF4FF" stroke="#1A6FF5" stroke-width="2"/><text x="455" y="242" text-anchor="middle" fill="#1D2129" font-size="13" font-family="sans-serif">子主题 C</text><line x1="145" y1="220" x2="145" y2="200" stroke="#1A6FF5" stroke-width="3"/><line x1="305" y1="220" x2="305" y2="200" stroke="#1A6FF5" stroke-width="3"/><line x1="455" y1="220" x2="455" y2="200" stroke="#1A6FF5" stroke-width="3"/><line x1="145" y1="200" x2="300" y2="190" stroke="#1A6FF5" stroke-width="3"/><line x1="305" y1="200" x2="300" y2="190" stroke="#1A6FF5" stroke-width="3"/><line x1="455" y1="200" x2="300" y2="190" stroke="#1A6FF5" stroke-width="3"/></svg>`),
+    flowchart: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="#F7F9FC"/><rect x="230" y="20" width="140" height="40" rx="10" fill="#1A6FF5"/><text x="300" y="45" text-anchor="middle" fill="white" font-size="14" font-family="sans-serif">开始</text><line x1="300" y1="60" x2="300" y2="80" stroke="#1A6FF5" stroke-width="3"/><rect x="230" y="80" width="140" height="40" rx="8" fill="white" stroke="#1A6FF5" stroke-width="2"/><text x="300" y="105" text-anchor="middle" fill="#1D2129" font-size="13" font-family="sans-serif">输入数据</text><polygon points="300,140 370,170 300,200 230,170" fill="#E8F4FD" stroke="#1A6FF5" stroke-width="2"/><text x="300" y="174" text-anchor="middle" fill="#1D2129" font-size="12" font-family="sans-serif">验证?</text><line x1="300" y1="120" x2="300" y2="140" stroke="#1A6FF5" stroke-width="3"/><line x1="370" y1="170" x2="450" y2="170" stroke="#10B981" stroke-width="3"/><text x="410" y="163" text-anchor="middle" fill="#10B981" font-size="11" font-family="sans-serif">YES</text><rect x="450" y="150" width="120" height="40" rx="8" fill="#D1FAE5" stroke="#10B981" stroke-width="2"/><text x="510" y="175" text-anchor="middle" fill="#059669" font-size="13" font-family="sans-serif">处理成功</text><line x1="230" y1="170" x2="150" y2="170" stroke="#DC2626" stroke-width="3"/><text x="190" y="163" text-anchor="middle" fill="#DC2626" font-size="11" font-family="sans-serif">NO</text><rect x="30" y="150" width="120" height="40" rx="8" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/><text x="90" y="175" text-anchor="middle" fill="#DC2626" font-size="13" font-family="sans-serif">重新输入</text></svg>`)
+};
+
+function loadSample(type) {
+    imageBase64 = SAMPLES[type];
+    document.getElementById('previewImg').src = imageBase64;
+    document.getElementById('previewWrap').style.display = 'block';
+    document.getElementById('generateBtn').disabled = false;
+    // 自动选对应图片类型
+    const idx = type === 'mindmap' ? 0 : type === 'flowchart' ? 1 : 2;
+    document.querySelectorAll('.type-btn').forEach((b,i) => b.classList.toggle('selected', i===idx));
+    selectedImgType = document.querySelectorAll('.type-btn')[idx].dataset.type;
+    document.getElementById('validateModal').style.display = 'none';
+    forceMode = true;
+}
+
 fetch('/api/health').then(r => r.json()).then(d => {
     if (!d.minimax_configured || !d.zhipu_configured) {
         document.getElementById('generateBtn').disabled = true;
@@ -813,5 +910,30 @@ fetch('/api/health').then(r => r.json()).then(d => {
     }
 });
 </script>
+<!-- 图片类型提示弹窗 -->
+<div class="modal-overlay" id="validateModal" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-icon">🤔</div>
+        <div class="modal-title">图片看起来不是图表类内容</div>
+        <div class="modal-desc" id="validateMsg">建议上传思维导图、流程图或思维笔记截图，识别效果最佳。</div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" onclick="forceGenerate()" style="margin-top:0;">🎵 仍然生成</button>
+            <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+            <div class="sample-grid">
+                <div class="sample-card" onclick="loadSample('mindmap')">
+                    <span class="sample-card-icon">📊</span>
+                    <span class="sample-card-label">思维导图样例</span>
+                </div>
+                <div class="sample-card" onclick="loadSample('flowchart')">
+                    <span class="sample-card-icon">🔀</span>
+                    <span class="sample-card-label">流程图样例</span>
+                </div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">
+                没有图？去 <a href="https://www.processon.com" target="_blank" style="color:#A78BFA;">ProcessOn</a> 免费在线作图
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

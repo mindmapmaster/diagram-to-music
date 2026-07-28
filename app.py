@@ -183,6 +183,54 @@ def minimax_generate(lyrics: str, title: str, style_prompt: str) -> dict:
 
 # ============ Flask 路由 ============
 
+@app.route("/api/validate", methods=["POST"])
+def validate_image():
+    """快速判断图片是否为思维导图/流程图/笔记"""
+    if "image" not in request.files:
+        return jsonify({"error": "请上传图片"}), 400
+
+    file = request.files["image"]
+    if not file.filename:
+        return jsonify({"error": "未选择图片"}), 400
+
+    img_bytes = file.read()
+    img_b64 = base64.b64encode(img_bytes).decode("utf-8")
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "png"
+    img_data_url = f"data:image/{ext};base64,{img_b64}"
+
+    if not ZHIPU_API_KEY:
+        return jsonify({"valid": True})  # 没配置就放过
+
+    payload = {
+        "model": ZHIPU_MODEL,
+        "messages": [{
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "这张图片是思维导图、流程图、组织结构图、UML图、泳道图、实体关系图、思维笔记、手写笔记、白板笔记或可视化笔记吗？只回答YES或NO。"},
+                {"type": "image_url", "image_url": {"url": img_data_url}},
+            ],
+        }],
+        "max_tokens": 10,
+        "temperature": 0,
+    }
+
+    try:
+        resp = _session.post(
+            f"{ZHIPU_BASE_URL}/chat/completions",
+            headers={"Authorization": f"Bearer {ZHIPU_API_KEY}", "Content-Type": "application/json"},
+            json=payload,
+            timeout=30,
+        )
+        data = resp.json()
+        if "choices" in data:
+            answer = data["choices"][0]["message"]["content"].strip().upper()
+            return jsonify({"valid": "YES" in answer})
+    except Exception:
+        pass
+
+    return jsonify({"valid": True})  # 校验失败也放过，不阻塞用户
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
