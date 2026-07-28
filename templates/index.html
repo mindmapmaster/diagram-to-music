@@ -545,7 +545,19 @@ body {
                     <div class="upload-text" id="uploadText">点击、拖拽或 Ctrl/Cmd+V 粘贴图片</div>
                     <div class="upload-hint">支持思维导图、流程图、思维笔记截图 • <span onclick="event.stopPropagation();pasteImage()" style="color:var(--primary);cursor:pointer;text-decoration:underline;">📋 粘贴图片</span></div>
                 </div>
-                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleUpload(event)">
+                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="
+                    var f = this.files[0];
+                    if(!f) return;
+                    var r = new FileReader();
+                    r.onload = function(e){
+                        document.getElementById('previewImg').src = e.target.result;
+                        document.getElementById('previewWrap').style.display = 'block';
+                        document.getElementById('generateBtn').disabled = false;
+                        document.getElementById('sampleSection').style.opacity = '0.3';
+                        document.getElementById('sampleSection').style.pointerEvents = 'none';
+                    };
+                    r.readAsDataURL(f);
+                ">
 
                 <div class="preview-wrap" id="previewWrap" style="display:none;">
                     <img id="previewImg" src="" alt="预览">
