@@ -494,8 +494,8 @@ body {
 <div class="hero">
     <div class="hero-inner">
         <div class="hero-badge">🎵 DIAGRAM TO MUSIC</div>
-        <h1 class="hero-title">用思维导图/流程图/思维笔记梳理的思考</h1>
-        <p class="hero-desc">变成听得见的旋律</p>
+        <h1 class="hero-title">上传图片，AI 为你写歌</h1>
+        <p class="hero-desc">思维导图、流程图、思维笔记 — 任何图片都能变成一首专属歌曲</p>
         <div class="hero-flow">
             <div class="hero-step">
                 <div class="hero-step-icon">📸</div>
@@ -533,9 +533,9 @@ body {
                     <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">1</span>
                     <span style="font-size:12px;font-weight:600;color:var(--text);">上传图片</span>
                 </div>
-                <div class="upload-zone" id="uploadZone" tabindex="0">
-                    <span class="upload-icon" onclick="event.stopPropagation();document.getElementById('fileInput').click()" style="cursor:pointer;">🎵</span>
-                    <div class="upload-text" id="uploadText" onclick="event.stopPropagation();document.getElementById('fileInput').click()" style="cursor:pointer;">点击、拖拽或快捷键粘贴图片</div>
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <span class="upload-icon">🎵</span>
+                    <div class="upload-text" id="uploadText">点击、拖拽或快捷键粘贴图片</div>
                     <div class="upload-hint">支持思维导图、流程图、思维笔记截图</div>
                 </div>
                 <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFile(event)">
