@@ -766,8 +766,6 @@ let selectedImgType = '图表';
 let selectedMusicStyle = '';
 let currentMp3Url = null;
 
-let selectedImgType = '图表';  // AI 自动识别，不再让用户选
-
 // 曲风选择
 document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(card => {
     card.addEventListener('click', function() {
@@ -972,7 +970,6 @@ fetch('/api/health').then(r => r.json()).then(d => {
         forceMode = true;
     };
     reader.readAsDataURL(blob);
-}
 
 fetch('/api/health').then(r => r.json()).then(d => {
     if (!d.minimax_configured || !d.zhipu_configured) {
