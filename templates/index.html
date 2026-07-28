@@ -712,7 +712,6 @@ body {
 <script>
 // 图片加载后统一处理
 function onImageReady(dataUrl){
-    alert('image loaded: ' + dataUrl.substring(0, 30));
     document.getElementById('previewImg').src = dataUrl;
     document.getElementById('previewWrap').style.display = 'block';
     document.getElementById('generateBtn').disabled = false;
@@ -738,7 +737,6 @@ function clearUpload(){
     document.getElementById('sampleSection').style.opacity = '1';
     document.getElementById('sampleSection').style.pointerEvents = 'auto';
     document.getElementById('fileInput').value = '';
-    pendingBlob = null;
 }
 var pendingBlob = null;
 // 样例数据
@@ -824,7 +822,6 @@ function toggleVisualizer(playing) {
 // 生成
 // 验证图片是否为图表类型
 let forceMode = false;
-let pendingBlob = null;
 
 async function startGenerate() {
     if (!imageBase64) { showError('请先上传图片'); return; }
