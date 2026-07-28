@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+_song_cache/
+tunnel_log.txt
+tunnel_url.txt

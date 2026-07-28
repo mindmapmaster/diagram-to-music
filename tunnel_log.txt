@@ -1,0 +1,16 @@
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added '[a.pinggy.io]:443' (RSA) to the list of known hosts.
+** WARNING: connection is not using a post-quantum key exchange algorithm.
+** This session may be vulnerable to "store now, decrypt later" attacks.
+** The server may need to be upgraded. See https://openssh.com/pq.html
+Allocated port 3 for remote forward to localhost:5001
+You are not authenticated.
+Your tunnel will expire in 60 minutes. Upgrade to Pinggy Pro to get unrestricted tunnels. https://dashboard.pinggy.io
+https://caowf-111-198-29-148.run.pinggy-free.link
+
+===== 隧道链接: https://caowf-111-198-29-148.run.pinggy-free.link =====
+已写入: C:\Users\po\WorkBuddy\2026-07-21-15-26-10\song-web\tunnel_url.txt
+https://gdfep-111-198-29-148.free.pinggy.net
+
+===== 隧道链接: https://gdfep-111-198-29-148.free.pinggy.net =====
+已写入: C:\Users\po\WorkBuddy\2026-07-21-15-26-10\song-web\tunnel_url.txt
