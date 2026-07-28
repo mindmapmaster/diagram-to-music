@@ -712,6 +712,10 @@ body {
 <div class="footer">上传图片，AI 为你创作专属音乐</div>
 
 <script>
+window.onerror = function(msg, url, line) {
+    document.getElementById('errorBox').textContent = 'JS Error: ' + msg + ' line:' + line;
+    document.getElementById('errorBox').classList.add('show');
+};
 let imageBase64 = null;
 let selectedImgType = '图表';
 let selectedMusicStyle = '';
