@@ -909,17 +909,17 @@ function downloadSong() {
 const PROCESSON_SAMPLES = {
     flowchart: {
         file: '/static/sample_flowchart.svg',
-        view: 'https://www.processon.com',
+        view: 'https://www.processon.com/view/69d761ce50f07d20c7ecb978',
         imgType: '流程图',
     },
     mindmap: {
         file: '/static/sample_mindmap.svg',
-        view: 'https://www.processon.com',
+        view: 'https://www.processon.com/view/695b920c4e3bc00c5538c3ab',
         imgType: '思维导图',
     },
     notes: {
         file: '/static/sample_notes.png',
-        view: 'https://www.processon.com',
+        view: 'https://www.processon.com/view/62f1fcc5f346fb49413cbb96',
         imgType: '思维笔记',
     }
 };
@@ -942,7 +942,7 @@ async function loadSampleWithProcesson(type) {
         if (oldLink) oldLink.remove();
         document.getElementById('previewWrap').insertAdjacentHTML('beforeend',
             `<div id="viewLink" style="position:absolute;bottom:8px;left:8px;font-size:10px;background:rgba(0,0,0,0.6);color:white;padding:2px 8px;border-radius:4px;">
-                已加载 ${type === 'mindmap' ? '思维导图' : type === 'flowchart' ? '流程图' : '思维笔记'}样例
+                <a href="${sample.view}" target="_blank" style="color:white;text-decoration:none;" onclick="event.stopPropagation()">📎 查看原图</a>
             </div>`);
 
         if (sample.imgType) {
