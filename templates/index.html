@@ -495,7 +495,7 @@ body {
     <div class="hero-inner">
         <div class="hero-badge">🎵 DIAGRAM TO MUSIC</div>
         <h1 class="hero-title">上传图片，AI 为你写歌</h1>
-        <p class="hero-desc">思维导图、流程图、思维笔记 — 任何图片都能变成一首专属歌曲</p>
+        <p class="hero-desc">上传思维导图、流程图、思维笔记 — AI 为你创作专属歌曲</p>
         <div class="hero-flow">
             <div class="hero-step">
                 <div class="hero-step-icon">📸</div>
@@ -533,7 +533,7 @@ body {
                     <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">1</span>
                     <span style="font-size:12px;font-weight:600;color:var(--text);">上传图表</span>
                 </div>
-                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-zone" id="uploadZone" tabindex="0" onclick="document.getElementById('fileInput').click()">
                     <span class="upload-icon">🎵</span>
                     <div class="upload-text" id="uploadText">点击、拖拽或快捷键粘贴图片</div>
                     <div class="upload-hint">支持思维导图、流程图、思维笔记截图</div>
@@ -575,7 +575,7 @@ body {
                     <span style="font-size:12px;font-weight:600;color:var(--text);">选择曲风</span>
                 </div>
                 <div class="style-grid">
-                    <div class="style-card selected" data-style="pop">
+                    <div class="style-card" data-style="pop">
                         <span class="style-emoji">🎤</span>
                         <span class="style-name">流行</span>
                     </div>
@@ -613,7 +613,10 @@ body {
                     </div>
                 </div>
 
-                <div class="form-label">③ 生成歌曲</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+                    <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">3</span>
+                    <span style="font-size:12px;font-weight:600;color:var(--text);">生成歌曲</span>
+                </div>
                 <div class="error-box" id="errorBox"></div>
                 <button class="btn btn-primary" id="generateBtn" onclick="startGenerate()" disabled>
                     🎵 生成歌曲
@@ -701,8 +704,8 @@ body {
 
 <script>
 let imageBase64 = null;
-let selectedImgType = '思维导图';
-let selectedMusicStyle = 'pop';
+let selectedImgType = '图表';
+let selectedMusicStyle = '';
 let currentMp3Url = null;
 
 let selectedImgType = '图表';  // AI 自动识别，不再让用户选// 曲风
@@ -725,20 +728,22 @@ uploadZone.addEventListener('drop', e => {
     if (e.dataTransfer.files.length) handleFileSelect({ target: e.dataTransfer });
 });
 
-// 快捷键粘贴图片
-document.addEventListener('paste', e => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-    for (const item of items) {
+// 快捷键粘贴图片（Mac: Cmd+V, Win: Ctrl+V）
+const pasteHandler = e => {
+    if (!e.clipboardData?.items) return;
+    for (const item of e.clipboardData.items) {
         if (item.type.startsWith('image/')) {
             e.preventDefault();
+            e.stopPropagation();
             handleFileSelect({ target: { files: [item.getAsFile()] } });
             return;
         }
     }
-});
-// 阻止上传框 onclick 在粘贴时触发
-uploadZone.addEventListener('paste', e => e.stopPropagation());
+};
+// 上传框直接聚焦时也能粘贴
+uploadZone.addEventListener('paste', pasteHandler);
+// 全局粘贴兜底
+document.addEventListener('paste', pasteHandler);
 
 function handleFile(e) { handleFileSelect({ target: e.target }); }
 
@@ -964,6 +969,11 @@ async function loadSampleWithProcesson(type) {
             </div>`);
 
         if (sample.imgType) selectedImgType = sample.imgType;
+        // 加载样例时自动选流行曲风
+        if (!selectedMusicStyle) {
+            selectedMusicStyle = 'pop';
+            document.querySelector('.style-card[data-style="pop"]')?.classList.add('selected');
+        }
         document.getElementById('validateModal').style.display = 'none';
         forceMode = true;
     };
