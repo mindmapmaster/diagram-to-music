@@ -905,22 +905,21 @@ function downloadSong() {
 }
 
 // 内置样例图片
-// ProcessOn 真实样例图片（流程图已确认可用）
+// Nicole 提供的真实样例
 const PROCESSON_SAMPLES = {
     flowchart: {
-        url: 'https://www.processon.com/chart_image/get/full/inner/template/img?tid=5f1a4de0762131429a7a3c36&thumbId=5f1a4de0762131429a7a3c34&canvasId=5f1a4de0762131429a7a3c33',
-        view: 'https://www.processon.com/view/5f1a4de0762131429a7a3c36',
+        file: '/static/sample_flowchart.svg',
+        view: 'https://www.processon.com',
         imgType: '流程图',
     },
     mindmap: {
-        // 思维导图使用 SVG 占位，链接到真实 ProcessOn 模板
-        svg: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420"><rect width="600" height="420" fill="#F7F9FC"/><rect x="230" y="160" width="140" height="42" rx="10" fill="#6C5CE7"/><text x="300" y="186" text-anchor="middle" fill="white" font-size="14" font-family="sans-serif" font-weight="bold">年中总结</text><line x1="300" y1="202" x2="300" y2="235" stroke="#6C5CE7" stroke-width="2"/><rect x="30" y="240" width="130" height="36" rx="8" fill="#F5F3FF" stroke="#6C5CE7" stroke-width="1.5"/><text x="95" y="263" text-anchor="middle" fill="#1D2129" font-size="12" font-family="sans-serif">工作成果</text><rect x="175" y="240" width="130" height="36" rx="8" fill="#F5F3FF" stroke="#6C5CE7" stroke-width="1.5"/><text x="240" y="263" text-anchor="middle" fill="#1D2129" font-size="12" font-family="sans-serif">个人成长</text><rect x="320" y="240" width="130" height="36" rx="8" fill="#F5F3FF" stroke="#6C5CE7" stroke-width="1.5"/><text x="385" y="263" text-anchor="middle" fill="#1D2129" font-size="12" font-family="sans-serif">公益活动</text><rect x="465" y="240" width="120" height="36" rx="8" fill="#F5F3FF" stroke="#6C5CE7" stroke-width="1.5"/><text x="525" y="263" text-anchor="middle" fill="#1D2129" font-size="12" font-family="sans-serif">不足改进</text><line x1="95" y1="240" x2="95" y2="225" stroke="#6C5CE7" stroke-width="2"/><line x1="240" y1="240" x2="240" y2="225" stroke="#6C5CE7" stroke-width="2"/><line x1="385" y1="240" x2="385" y2="225" stroke="#6C5CE7" stroke-width="2"/><line x1="525" y1="240" x2="525" y2="225" stroke="#6C5CE7" stroke-width="2"/><line x1="95" y1="225" x2="300" y2="202" stroke="#6C5CE7" stroke-width="2"/><line x1="240" y1="225" x2="300" y2="202" stroke="#6C5CE7" stroke-width="2"/><line x1="385" y1="225" x2="300" y2="202" stroke="#6C5CE7" stroke-width="2"/><line x1="525" y1="225" x2="300" y2="202" stroke="#6C5CE7" stroke-width="2"/><rect x="40" y="300" width="115" height="28" rx="6" fill="#EDF4FF" stroke="#A78BFA" stroke-width="1"/><text x="97" y="319" text-anchor="middle" fill="#1D2129" font-size="11" font-family="sans-serif">项目A交付</text><rect x="160" y="300" width="115" height="28" rx="6" fill="#EDF4FF" stroke="#A78BFA" stroke-width="1"/><text x="217" y="319" text-anchor="middle" fill="#1D2129" font-size="11" font-family="sans-serif">培训课程</text><rect x="280" y="300" width="115" height="28" rx="6" fill="#EDF4FF" stroke="#A78BFA" stroke-width="1"/><text x="337" y="319" text-anchor="middle" fill="#1D2129" font-size="11" font-family="sans-serif">志愿活动</text><rect x="400" y="300" width="115" height="28" rx="6" fill="#EDF4FF" stroke="#A78BFA" stroke-width="1"/><text x="457" y="319" text-anchor="middle" fill="#1D2129" font-size="11" font-family="sans-serif">时间管理</text></svg>`),
-        view: 'https://www.processon.com/view/629eefa31e08532ab7963343',
+        file: '/static/sample_mindmap.svg',
+        view: 'https://www.processon.com',
         imgType: '思维导图',
     },
     notes: {
-        svg: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420"><rect width="600" height="420" fill="#F7F9FC"/><rect x="20" y="20" width="560" height="50" rx="8" fill="#00D2FF" opacity="0.1"/><text x="40" y="50" fill="#00D2FF" font-size="20" font-family="sans-serif" font-weight="bold">📝 读书笔记 - AI产品设计</text><line x1="20" y1="65" x2="580" y2="65" stroke="#E5EAF0" stroke-width="1"/><text x="40" y="95" fill="#1D2129" font-size="14" font-family="sans-serif" font-weight="bold">一、核心概念</text><text x="40" y="120" fill="#6B7785" font-size="13" font-family="sans-serif">• AI产品与传统产品的本质区别在于不确定性的管理</text><text x="40" y="142" fill="#6B7785" font-size="13" font-family="sans-serif">• 用户预期管理与模型能力边界是核心设计挑战</text><text x="40" y="172" fill="#1D2129" font-size="14" font-family="sans-serif" font-weight="bold">二、设计原则</text><text x="40" y="197" fill="#6B7785" font-size="13" font-family="sans-serif">• 透明度：让用户理解AI在做决策时的依据</text><text x="40" y="219" fill="#6B7785" font-size="13" font-family="sans-serif">• 可控性：用户总能干预、修正、覆盖AI的结果</text><text x="40" y="241" fill="#6B7785" font-size="13" font-family="sans-serif">• 渐进信任：从小功能开始，逐步建立用户对AI的信任</text><text x="40" y="271" fill="#1D2129" font-size="14" font-family="sans-serif" font-weight="bold">三、实践要点</text><text x="40" y="296" fill="#6B7785" font-size="13" font-family="sans-serif">• 错误处理要优雅，AI偶尔犯错是预期行为</text><text x="40" y="318" fill="#6B7785" font-size="13" font-family="sans-serif">• 反馈循环：记录用户纠偏行为来持续优化模型</text><rect x="20" y="340" width="560" height="60" rx="6" fill="#FFF3CD" stroke="#F59E0B" stroke-width="1"/><text x="40" y="363" fill="#B45309" font-size="13" font-family="sans-serif" font-weight="bold">💡 关键洞察</text><text x="40" y="383" fill="#92400E" font-size="12" font-family="sans-serif">好的AI产品设计师不是技术专家，而是"预期管理专家"。</text></svg>`),
-        view: 'https://www.processon.com/view/62f27b46e0b34d3a87d4f801',
+        file: '/static/sample_notes.png',
+        view: 'https://www.processon.com',
         imgType: '思维笔记',
     }
 };
@@ -929,30 +928,31 @@ async function loadSampleWithProcesson(type) {
     const sample = PROCESSON_SAMPLES[type];
     if (!sample) return;
 
-    if (sample.url) {
-        // 流程图：直接用 ProcessOn 图片
-        imageBase64 = sample.url;  // 后端会下载这个 URL
-        document.getElementById('previewImg').src = sample.url;
-    } else if (sample.svg) {
-        // 思维导图/笔记：用 SVG 占位
-        imageBase64 = sample.svg;
-        document.getElementById('previewImg').src = sample.svg;
-    }
+    // 用 Fetch 加载本地文件并转 base64
+    const resp = await fetch(sample.file);
+    const blob = await resp.blob();
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        imageBase64 = ev.target.result;
+        document.getElementById('previewImg').src = imageBase64;
+        document.getElementById('previewWrap').style.display = 'block';
+        document.getElementById('generateBtn').disabled = false;
+        // 清除旧的查看原图链接
+        const oldLink = document.getElementById('viewLink');
+        if (oldLink) oldLink.remove();
+        document.getElementById('previewWrap').insertAdjacentHTML('beforeend',
+            `<div id="viewLink" style="position:absolute;bottom:8px;left:8px;font-size:10px;background:rgba(0,0,0,0.6);color:white;padding:2px 8px;border-radius:4px;">
+                已加载 ${type === 'mindmap' ? '思维导图' : type === 'flowchart' ? '流程图' : '思维笔记'}样例
+            </div>`);
 
-    document.getElementById('previewWrap').style.display = 'block';
-    document.getElementById('generateBtn').disabled = false;
-    document.getElementById('previewWrap').insertAdjacentHTML('beforeend',
-        `<div style="position:absolute;bottom:8px;left:8px;font-size:10px;background:rgba(0,0,0,0.6);color:white;padding:2px 8px;border-radius:4px;">
-            <a href="${sample.view}" target="_blank" style="color:white;text-decoration:none;" onclick="event.stopPropagation()">📎 查看原图</a>
-        </div>`);
-
-    // 自动选类型
-    if (sample.imgType) {
-        document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('selected', b.dataset.type === sample.imgType));
-        selectedImgType = sample.imgType;
-    }
-    document.getElementById('validateModal').style.display = 'none';
-    forceMode = true;
+        if (sample.imgType) {
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('selected', b.dataset.type === sample.imgType));
+            selectedImgType = sample.imgType;
+        }
+        document.getElementById('validateModal').style.display = 'none';
+        forceMode = true;
+    };
+    reader.readAsDataURL(blob);
 }
 
 fetch('/api/health').then(r => r.json()).then(d => {
