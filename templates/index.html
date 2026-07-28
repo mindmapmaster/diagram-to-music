@@ -545,7 +545,7 @@ body {
                     <div class="upload-text" id="uploadText">点击、拖拽或 Ctrl/Cmd+V 粘贴图片</div>
                     <div class="upload-hint">支持思维导图、流程图、思维笔记截图 • <span onclick="event.stopPropagation();pasteImage()" style="color:var(--primary);cursor:pointer;text-decoration:underline;">📋 粘贴图片</span></div>
                 </div>
-                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="alert('file selected: ' + this.files.length)">
+                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleUpload(event)">
 
                 <div class="preview-wrap" id="previewWrap" style="display:none;">
                     <img id="previewImg" src="" alt="预览">
@@ -712,10 +712,6 @@ body {
 <div class="footer">上传图片，AI 为你创作专属音乐</div>
 
 <script>
-window.onerror = function(msg, url, line) {
-    document.getElementById('errorBox').textContent = 'JS Error: ' + msg + ' line:' + line;
-    document.getElementById('errorBox').classList.add('show');
-};
 let imageBase64 = null;
 let selectedImgType = '图表';
 let selectedMusicStyle = '';
@@ -733,7 +729,6 @@ document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(card => {
 });
 
 // 上传
-document.getElementById('fileInput').addEventListener('change', handleUpload);
 const uploadZone = document.getElementById('uploadZone');
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
