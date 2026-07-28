@@ -540,16 +540,16 @@ body {
                     <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">1</span>
                     <span style="font-size:12px;font-weight:600;color:var(--text);">上传图片</span>
                 </div>
-                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondrop="event.preventDefault();var f=event.dataTransfer.files[0];if(f){var r=new FileReader();r.onload=function(e){document.getElementById('previewImg').src=e.target.result;document.getElementById('previewWrap').style.display='block';document.getElementById('generateBtn').disabled=false;document.getElementById('sampleSection').style.opacity='0.3';document.getElementById('sampleSection').style.pointerEvents='none';};r.readAsDataURL(f);}" ondragover="event.preventDefault()">
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondrop="event.preventDefault();var f=event.dataTransfer.files[0];if(f){var r=new FileReader();r.onload=function(e){onImageReady(e.target.result)};r.readAsDataURL(f);}" ondragover="event.preventDefault()">
                     <span class="upload-icon">🎵</span>
                     <div class="upload-text" id="uploadText">点击、拖拽或 Ctrl/Cmd+V 粘贴图片</div>
-                    <div class="upload-hint">支持思维导图、流程图、思维笔记截图 • <span onclick="event.stopPropagation();navigator.clipboard.read().then(function(items){for(var i of items){for(var t of i.types){if(t.indexOf('image')===0){i.getType(t).then(function(b){var r=new FileReader();r.onload=function(e){document.getElementById('previewImg').src=e.target.result;document.getElementById('previewWrap').style.display='block';document.getElementById('generateBtn').disabled=false;document.getElementById('sampleSection').style.opacity='0.3';document.getElementById('sampleSection').style.pointerEvents='none';};r.readAsDataURL(b);});return;}}}}).catch(function(){alert('请用 Ctrl+V 粘贴')});" style="color:var(--primary);cursor:pointer;text-decoration:underline;">📋 粘贴图片</span></div>
+                    <div class="upload-hint">支持思维导图、流程图、思维笔记截图 • <span onclick="event.stopPropagation();navigator.clipboard.read().then(function(items){for(var i of items){for(var t of i.types){if(t.indexOf('image')===0){i.getType(t).then(function(b){var r=new FileReader();r.onload=function(e){onImageReady(e.target.result)};r.readAsDataURL(b);});return;}}}})" style="color:var(--primary);cursor:pointer;text-decoration:underline;">📋 粘贴图片</span></div>
                 </div>
-                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="var f=this.files[0];if(f){var r=new FileReader();r.onload=function(e){document.getElementById('previewImg').src=e.target.result;document.getElementById('previewWrap').style.display='block';document.getElementById('generateBtn').disabled=false;document.getElementById('sampleSection').style.opacity='0.3';document.getElementById('sampleSection').style.pointerEvents='none';};r.readAsDataURL(f);}">
+                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="var f=this.files[0];if(f){var r=new FileReader();r.onload=function(e){onImageReady(e.target.result)};r.readAsDataURL(f);}">
 
                 <div class="preview-wrap" id="previewWrap" style="display:none;">
                     <img id="previewImg" src="" alt="预览">
-                    <div class="preview-badge">已选择 <span onclick="document.getElementById('previewImg').src='';document.getElementById('previewWrap').style.display='none';document.getElementById('generateBtn').disabled=true;document.getElementById('sampleSection').style.opacity='1';document.getElementById('sampleSection').style.pointerEvents='auto';document.getElementById('fileInput').value='';" style="cursor:pointer;margin-left:6px;opacity:0.7;">✕ 清除</span></div>
+                    <div class="preview-badge">已选择 <span onclick="clearUpload()" style="cursor:pointer;margin-left:6px;opacity:0.7;">✕ 清除</span></div>
                 </div>
 
                 <div style="text-align:center;margin-top:10px;">
@@ -710,6 +710,36 @@ body {
 <div class="footer">上传图片，AI 为你创作专属音乐</div>
 
 <script>
+// 图片加载后统一处理
+function onImageReady(dataUrl){
+    document.getElementById('previewImg').src = dataUrl;
+    document.getElementById('previewWrap').style.display = 'block';
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('sampleSection').style.opacity = '0.3';
+    document.getElementById('sampleSection').style.pointerEvents = 'none';
+    // 校验图片类型
+    fetch(dataUrl).then(function(r){return r.blob()}).then(function(b){
+        var fd = new FormData(); fd.append('image', b, 'upload.png');
+        fetch('/api/validate', {method:'POST', body:fd}).then(function(r){return r.json()}).then(function(d){
+            if(!d.valid){
+                document.getElementById('validateMsg').textContent = '图片识别为非思维导图/流程图/思维笔记，生成效果可能不理想';
+                document.getElementById('validateModal').style.display = 'flex';
+                document.getElementById('generateBtn').disabled = true;
+                pendingBlob = b;
+            }
+        }).catch(function(){});
+    });
+}
+function clearUpload(){
+    document.getElementById('previewImg').src = '';
+    document.getElementById('previewWrap').style.display = 'none';
+    document.getElementById('generateBtn').disabled = true;
+    document.getElementById('sampleSection').style.opacity = '1';
+    document.getElementById('sampleSection').style.pointerEvents = 'auto';
+    document.getElementById('fileInput').value = '';
+    pendingBlob = null;
+}
+var pendingBlob = null;
 // 样例数据
 var SAMPLES={mindmap:'/static/sample_mindmap.svg',flowchart:'/static/sample_flowchart.svg',notes:'/static/sample_notes.png'};
 var SAMPLE_VIEWS={mindmap:'https://www.processon.com/view/695b920c4e3bc00c5538c3ab',flowchart:'https://www.processon.com/view/69d761ce50f07d20c7ecb978',notes:'https://www.processon.com/view/62f1fcc5f346fb49413cbb96'};
@@ -830,13 +860,14 @@ async function startGenerate() {
 
 function closeModal() {
     document.getElementById('validateModal').style.display = 'none';
+    document.getElementById('generateBtn').disabled = false;
     forceMode = false;
 }
 
 function forceGenerate() {
     document.getElementById('validateModal').style.display = 'none';
+    document.getElementById('generateBtn').disabled = false;
     forceMode = true;
-    doGenerate();
 }
 
 async function doGenerate() {
@@ -961,11 +992,11 @@ fetch('/api/health').then(r => r.json()).then(d => {
             <button class="btn btn-primary" onclick="forceGenerate()" style="margin-top:0;">🎵 仍然生成</button>
             <button class="btn btn-ghost" onclick="closeModal()">取消</button>
             <div class="sample-grid">
-                <div class="sample-card" onclick="loadSample('mindmap')">
+                <div class="sample-card" onclick="loadSampleInline('mindmap')">
                     <span class="sample-card-icon">📊</span>
                     <span class="sample-card-label">思维导图样例</span>
                 </div>
-                <div class="sample-card" onclick="loadSample('flowchart')">
+                <div class="sample-card" onclick="loadSampleInline('flowchart')">
                     <span class="sample-card-icon">🔀</span>
                     <span class="sample-card-label">流程图样例</span>
                 </div>
