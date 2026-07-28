@@ -710,7 +710,8 @@ body {
 <div class="footer">上传图片，AI 为你创作专属音乐</div>
 
 <script>
-// 图片加载后统一处理
+alert('JS loaded OK');
+window.onerror=function(m,u,l){document.getElementById('errorBox').textContent='JS ERR:'+m+' line:'+l;document.getElementById('errorBox').classList.add('show');return false;}
 function onImageReady(dataUrl){
     document.getElementById('previewImg').src = dataUrl;
     document.getElementById('previewWrap').style.display = 'block';
