@@ -728,7 +728,9 @@ document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(card => {
 
 // 样例卡片
 document.querySelectorAll('.sample-card-btn').forEach(card => {
+    console.log('binding sample card:', card.dataset.sample);
     card.addEventListener('click', function() {
+        console.log('sample clicked:', this.dataset.sample);
         loadSampleWithProcesson(this.dataset.sample);
     });
 });
