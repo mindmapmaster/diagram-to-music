@@ -322,8 +322,6 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                     </div>
                     <div class="song-title" id="songTitle">AI 创作歌曲</div>
                     <div class="song-tags" id="songTags"></div>
-                    <div class="song-meta-label" id="summaryLabel" style="display:none;">摘要</div>
-                    <div class="song-summary" id="songSummary"></div>
                     <div class="waveform" id="waveform"></div>
                     <div class="song-meta">
                         <div><span id="duration">0:00</span><small>时长</small></div>
@@ -598,18 +596,6 @@ async function doGenerate() {
         tag.textContent = tagName;
         tagsEl.appendChild(tag);
 
-        var summary = (d.summary || '').trim();
-        var summaryEl = document.getElementById('songSummary');
-        var summaryLabel = document.getElementById('summaryLabel');
-        if (summary) {
-            summaryEl.textContent = summary;
-            summaryEl.style.display = 'block';
-            summaryLabel.style.display = 'block';
-        } else {
-            summaryEl.style.display = 'none';
-            summaryLabel.style.display = 'none';
-        }
-
         generateWaveform();
         updateDuration();
         document.getElementById('audioStatus').textContent = '歌曲就绪';
@@ -637,11 +623,13 @@ function renderLyrics(text) {
     }
     var lines = text.split('\n');
     var sectionDiv = null;
+    var foundSection = false;
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i].trim();
         if (!line) continue;
         var sectionMatch = line.match(/^\[(verse|chorus|bridge|outro|intro|pre-chorus|hook)\s*(\d*)\]/i);
         if (sectionMatch) {
+            foundSection = true;
             var sectionName = sectionMatch[1].toUpperCase();
             var sectionNum = sectionMatch[2] ? ' ' + sectionMatch[2] : '';
             var header = document.createElement('div');
@@ -659,6 +647,7 @@ function renderLyrics(text) {
             sectionDiv.className = 'lyrics-section';
             c.appendChild(sectionDiv);
         } else if (line.indexOf('【') === 0) {
+            foundSection = true;
             var label = document.createElement('div');
             label.className = 'lyrics-label';
             label.textContent = line;
@@ -667,6 +656,7 @@ function renderLyrics(text) {
             sectionDiv.className = 'lyrics-section';
             c.appendChild(sectionDiv);
         } else {
+            if (!foundSection) continue;
             var d = document.createElement('div');
             d.className = 'lyrics-line';
             d.textContent = line;
