@@ -41,8 +41,7 @@ User=root
 WorkingDirectory=/opt/diagram-to-music
 Environment="MINIMAX_API_KEY=sk-cp-qg1lWPpYimwyOcvGKm5GkhS6vhPVFAZKFbEvUvEy3QvVt1btbUYUF49fnyBfr6pVQgQ3QhsLBm70z3FtJ4GJJ0Gs-mrxgf9ekxNq5wSvmWkEMZJ9J79bMhg"
 Environment="ZHIPU_API_KEY=d13f82b5de734bd6a288da3265a2fd85.FlBWkvIcIjotr0Ww"
-ExecStart=/usr/local/bin/gunicorn app:app --bind 0.0.0.0:5001 --workers 1 --threads 4 --timeout 300
-MemoryMax=1200M
+ExecStart=/usr/local/bin/gunicorn app:app --bind 0.0.0.0:5001 --workers 1 --threads 4 --timeout 600 --access-logfile /var/log/gunicorn/access.log --error-logfile /var/log/gunicorn/error.log --log-level info
 Restart=always
 RestartSec=5
 

@@ -152,7 +152,7 @@ def _load_result(song_id: str):
 
 
 def _download_audio(url: str) -> bytes:
-    resp = _session.get(url, timeout=60)
+    resp = _session.get(url, timeout=120)
     resp.raise_for_status()
     return resp.content
 
@@ -212,21 +212,21 @@ def call_zhipu(image_base64: str, img_type: str, music_style_tag: str) -> dict:
         "temperature": 0.8,
     }
 
-    for attempt in range(3):
+    for attempt in range(2):
         try:
             resp = _session.post(
                 f"{ZHIPU_BASE_URL}/chat/completions",
                 headers={"Authorization": f"Bearer {ZHIPU_API_KEY}", "Content-Type": "application/json"},
                 json=payload,
-                timeout=120,
+                timeout=60,
             )
             data = resp.json()
             if "choices" in data:
                 break
-            if attempt < 2:
+            if attempt < 1:
                 time.sleep(2)
         except Exception:
-            if attempt < 2:
+            if attempt < 1:
                 time.sleep(2)
     else:
         err = data.get("error", {}).get("message", str(data)) if "data" in dir() else "网络错误"
@@ -279,7 +279,7 @@ def minimax_generate(lyrics: str, title: str, style_prompt: str) -> dict:
         MINIMAX_API_URL,
         headers={"Authorization": f"Bearer {MINIMAX_API_KEY}", "Content-Type": "application/json"},
         json=body,
-        timeout=120,
+        timeout=180,
     )
     data = resp.json()
 
