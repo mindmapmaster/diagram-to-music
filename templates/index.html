@@ -141,18 +141,18 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 .cases-divider::after { content:''; flex:1; height:1px; background:var(--card-border); }
 .cases-divider span { font-size:12px; font-weight:600; color:var(--text-secondary); white-space:nowrap; }
 .cases-list { display:flex; flex-direction:column; gap:10px; }
-.case-item { display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--card-border); border-radius:var(--radius-xs); padding:8px; transition:var(--transition); }
+.case-item { display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--card-border); border-radius:var(--radius-xs); padding:10px 12px; transition:var(--transition); }
 .case-item:hover { border-color:var(--primary); }
-.case-row { display:flex; gap:10px; }
-.case-thumb { width:64px; height:48px; border-radius:6px; object-fit:cover; cursor:pointer; flex-shrink:0; transition:var(--transition); }
+.case-row { display:flex; gap:12px; align-items:center; }
+.case-thumb { width:56px; height:56px; border-radius:8px; object-fit:cover; cursor:pointer; flex-shrink:0; transition:var(--transition); }
 .case-thumb:hover { opacity:0.8; }
-.case-detail { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; }
-.case-title { font-size:13px; font-weight:700; margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.case-tag { background:rgba(108,92,231,0.12); color:#A78BFA; font-size:10px; padding:2px 8px; border-radius:8px; display:inline-block; width:fit-content; margin-bottom:4px; }
-.case-play-btn { background:none; border:1px solid var(--card-border); color:var(--text-secondary); font-size:11px; padding:3px 10px; border-radius:6px; cursor:pointer; transition:var(--transition); align-self:flex-start; }
+.case-detail { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.case-title { font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.case-tag { background:rgba(108,92,231,0.12); color:#A78BFA; font-size:10px; padding:2px 8px; border-radius:8px; display:inline-block; width:fit-content; }
+.case-play-btn { background:none; border:1px solid var(--card-border); color:var(--text-secondary); font-size:12px; padding:6px 14px; border-radius:8px; cursor:pointer; transition:var(--transition); flex-shrink:0; }
 .case-play-btn:hover { border-color:var(--primary); color:var(--primary); }
 .case-play-btn.playing { background:var(--primary); color:white; border-color:var(--primary); }
-.case-audio { margin-top:6px; display:none; }
+.case-audio { margin-top:8px; display:none; }
 .case-audio.show { display:block; }
 .case-audio audio { width:100%; border-radius:6px; }
 
@@ -221,8 +221,9 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
     .waveform-bar { width:3px; }
     .btn { padding:10px; font-size:13px; }
     .modal-box { margin:0 12px; padding:20px; }
-    .case-thumb { width:56px; height:42px; }
+    .case-thumb { width:48px; height:48px; }
     .case-title { font-size:12px; }
+    .case-play-btn { padding:5px 10px; font-size:11px; }
 }
 </style>
 </head>
@@ -783,8 +784,8 @@ function loadCases() {
                     '<div class="case-detail">' +
                         '<div class="case-title">' + c.title + '</div>' +
                         '<span class="case-tag">' + (c.style_name || c.style) + '</span>' +
-                        '<button class="case-play-btn" id="caseBtn-' + c.id + '" onclick="toggleCasePlay(\'' + c.id + '\')">▶ 播放</button>' +
                     '</div>' +
+                    '<button class="case-play-btn" id="caseBtn-' + c.id + '" onclick="toggleCasePlay(\'' + c.id + '\')">▶ 播放</button>' +
                 '</div>' +
                 '<div class="case-audio" id="caseAudio-' + c.id + '">' +
                     '<audio controls src="' + c.audio + '" onended="resetCaseBtn(\'' + c.id + '\')"></audio>' +
