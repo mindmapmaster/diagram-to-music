@@ -206,7 +206,7 @@ def validate_image():
         "messages": [{
             "role": "user",
             "content": [
-                {"type": "text", "text": "这张图片是思维导图、流程图、组织结构图、UML图、泳道图、实体关系图、思维笔记、手写笔记、白板笔记或可视化笔记吗？只回答YES或NO。"},
+                {"type": "text", "text": "这张图片是否包含文字、图形、结构化信息（如思维导图、流程图、笔记、图表、树状图、关系图、白板内容等）？只要图片中有文字或结构化可视内容就回答YES，如果是纯风景照或人脸照片才回答NO。只回答YES或NO。"},
                 {"type": "image_url", "image_url": {"url": img_data_url}},
             ],
         }],
