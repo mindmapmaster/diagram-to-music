@@ -67,7 +67,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 
 /* Styles */
 .style-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
-.style-card { padding:10px 4px; border:1px solid var(--card-border); border-radius:var(--radius-xs); cursor:pointer; text-align:center; transition:var(--transition); background:var(--surface); }
+.style-card { padding:10px 4px; border:1px solid var(--card-border); border-radius:var(--radius-xs); cursor:pointer; text-align:center; transition:var(--transition); background:var(--surface); display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:62px; }
 .style-card:hover { border-color:var(--primary); background:rgba(108,92,231,0.06); transform:translateY(-1px); }
 .style-card.selected { border-color:var(--accent); background:rgba(255,107,157,0.12); box-shadow:0 0 12px rgba(255,107,157,0.15); }
 .style-emoji { font-size:18px; display:block; margin-bottom:2px; }
