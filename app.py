@@ -12,6 +12,13 @@ import requests
 from pathlib import Path
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template, send_file, abort
+from io import BytesIO
+
+try:
+    from PIL import Image
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
 
 # PythonAnywhere 免费版代理配置（仅 PythonAnywhere 环境启用）
 _session = requests.Session()
@@ -54,6 +61,38 @@ CASES_DIR = Path(__file__).parent / "static" / "cases"
 def _ensure_dirs():
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     CASES_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _compress_image(img_bytes: bytes, max_size: int = 1024) -> tuple:
+    """压缩图片：缩放到 max_size 以内，转为 JPEG quality=85。
+    返回 (compressed_bytes, ext, data_url)。
+    如果 Pillow 不可用，回退到原始 bytes。
+    """
+    if not HAS_PIL:
+        b64 = base64.b64encode(img_bytes).decode("utf-8")
+        return img_bytes, "png", f"data:image/png;base64,{b64}"
+
+    try:
+        img = Image.open(BytesIO(img_bytes))
+        if img.mode in ("RGBA", "LA", "P"):
+            img = img.convert("RGB")
+        elif img.mode != "RGB":
+            img = img.convert("RGB")
+
+        w, h = img.size
+        if max(w, h) > max_size:
+            ratio = max_size / max(w, h)
+            img = img.resize((int(w * ratio), int(h * ratio)), Image.LANCZOS)
+
+        buf = BytesIO()
+        img.save(buf, format="JPEG", quality=85, optimize=True)
+        compressed = buf.getvalue()
+
+        b64 = base64.b64encode(compressed).decode("utf-8")
+        return compressed, "jpg", f"data:image/jpeg;base64,{b64}"
+    except Exception:
+        b64 = base64.b64encode(img_bytes).decode("utf-8")
+        return img_bytes, "png", f"data:image/png;base64,{b64}"
 
 
 def _generate_song_id():
@@ -278,9 +317,8 @@ def validate_image():
         return jsonify({"error": "未选择图片"}), 400
 
     img_bytes = file.read()
-    img_b64 = base64.b64encode(img_bytes).decode("utf-8")
-    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "png"
-    img_data_url = f"data:image/{ext};base64,{img_b64}"
+    # 压缩图片，防止大图导致 OOM
+    _, _, img_data_url = _compress_image(img_bytes, max_size=512)
 
     if not ZHIPU_API_KEY:
         return jsonify({"safe": True, "is_diagram": True})
@@ -414,11 +452,9 @@ def create_song():
     img_type = request.form.get("img_type", "思维导图")
     music_style_tag = request.form.get("music_style", "pop")
 
-    # 读取图片
+    # 读取图片并压缩，防止大图导致 OOM
     img_bytes = file.read()
-    img_b64 = base64.b64encode(img_bytes).decode("utf-8")
-    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "png"
-    img_data_url = f"data:image/{ext};base64,{img_b64}"
+    compressed_bytes, ext, img_data_url = _compress_image(img_bytes, max_size=1024)
 
     try:
         # Step 1: AI 识别 + 生成歌词
@@ -430,7 +466,7 @@ def create_song():
         # Step 3: 下载音频并保存到本地（MiniMax URL 24h 过期）
         audio_bytes = _download_audio(music_result["audio_url"])
         style_name = STYLE_NAME_MAP.get(music_style_tag, music_style_tag)
-        song_id = _save_result(img_bytes, ext, ai_result["lyrics"], ai_result["title"], music_style_tag, style_name, audio_bytes)
+        song_id = _save_result(compressed_bytes, ext, ai_result["lyrics"], ai_result["title"], music_style_tag, style_name, audio_bytes)
 
         return jsonify({
             "status": "done",

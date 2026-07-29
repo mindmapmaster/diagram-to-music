@@ -472,14 +472,43 @@ function handlePaste() {
     }).catch(function() { alert('请使用 Ctrl+V (Mac: Cmd+V) 直接粘贴图片'); });
 }
 
+function compressImage(dataUrl, callback) {
+    var img = new Image();
+    img.onload = function() {
+        var maxW = 1920, maxH = 1920;
+        var w = img.width, h = img.height;
+        if (w > maxW || h > maxH) {
+            var ratio = Math.min(maxW / w, maxH / h);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        try {
+            callback(canvas.toDataURL('image/jpeg', 0.85));
+        } catch(e) {
+            callback(dataUrl);
+        }
+    };
+    img.onerror = function() { callback(dataUrl); };
+    img.src = dataUrl;
+}
+
 function readAndShow(file) {
     if (file.type && file.type.indexOf('image') !== 0) { showError('请上传图片文件'); return; }
     var reader = new FileReader();
     reader.onload = function(e) {
-        imageDataUrl = e.target.result;
-        showPreview(imageDataUrl, null);
-        forceMode = false;
-        validateOnUpload();
+        compressImage(e.target.result, function(compressedUrl) {
+            imageDataUrl = compressedUrl;
+            showPreview(imageDataUrl, null);
+            forceMode = false;
+            validateOnUpload();
+        });
     };
     reader.readAsDataURL(file);
 }
@@ -491,7 +520,10 @@ async function validateOnUpload() {
         var fd = new FormData();
         fd.append('image', blob, 'upload.png');
         var r = await fetch('/api/validate', {method:'POST', body:fd});
-        var d = await r.json();
+        var text = await r.text();
+        if (!text) { return; }
+        var d;
+        try { d = JSON.parse(text); } catch(e) { return; }
         if (d.safe === false) {
             resetAll();
             showError('图片包含违规内容，无法上传');

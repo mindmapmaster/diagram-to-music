@@ -26,9 +26,12 @@ run("apt-get update -qq && apt-get install -y -qq python3-pip git nginx 2>&1 | t
 run("rm -rf /opt/diagram-to-music 2>/dev/null; git clone https://github.com/mindmapmaster/diagram-to-music.git /opt/diagram-to-music", "克隆代码")
 
 # Step 3: Install Python deps
-run("pip3 install flask requests gunicorn 2>&1 | tail -3", "安装 Python 依赖")
+run("pip3 install flask requests gunicorn Pillow 2>&1 | tail -5", "安装 Python 依赖")
 
-# Step 4: Create systemd service
+# Step 3b: Fix swappiness (default 0 causes OOM killer before swap is used)
+run('sysctl vm.swappiness=60 && grep -q "vm.swappiness" /etc/sysctl.conf || echo "vm.swappiness=60" >> /etc/sysctl.conf', "设置 swappiness=60")
+
+# Step 4: Create systemd service (1 worker to reduce memory pressure on 1.6GB ECS)
 service_config = """[Unit]
 Description=Diagram to Music Flask App
 After=network.target
@@ -38,7 +41,8 @@ User=root
 WorkingDirectory=/opt/diagram-to-music
 Environment="MINIMAX_API_KEY=sk-cp-qg1lWPpYimwyOcvGKm5GkhS6vhPVFAZKFbEvUvEy3QvVt1btbUYUF49fnyBfr6pVQgQ3QhsLBm70z3FtJ4GJJ0Gs-mrxgf9ekxNq5wSvmWkEMZJ9J79bMhg"
 Environment="ZHIPU_API_KEY=d13f82b5de734bd6a288da3265a2fd85.FlBWkvIcIjotr0Ww"
-ExecStart=/usr/local/bin/gunicorn app:app --bind 0.0.0.0:5001 --workers 2 --threads 4 --timeout 300
+ExecStart=/usr/local/bin/gunicorn app:app --bind 0.0.0.0:5001 --workers 1 --threads 4 --timeout 300
+MemoryMax=1200M
 Restart=always
 RestartSec=5
 
