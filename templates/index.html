@@ -135,20 +135,32 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 /* Sample Icons */
 .sample-icon-img { width:32px; height:32px; display:block; margin:0 auto 4px; }
 
-/* Cases */
-.cases-section { margin-top:16px; }
-.cases-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:12px; }
-.case-card { background:var(--surface); border:1px solid var(--card-border); border-radius:var(--radius-xs); overflow:hidden; cursor:pointer; transition:var(--transition); }
-.case-card:hover { border-color:var(--primary); transform:translateY(-2px); }
-.case-thumb { width:100%; aspect-ratio:16/10; object-fit:cover; display:block; background:var(--card-bg); }
-.case-info { padding:10px; }
-.case-title { font-size:13px; font-weight:700; margin-bottom:4px; }
-.case-meta { display:flex; align-items:center; justify-content:space-between; }
-.case-tag { background:rgba(108,92,231,0.12); color:#A78BFA; font-size:10px; padding:2px 8px; border-radius:8px; }
-.case-play { font-size:12px; color:var(--text-secondary); }
-.case-player { display:none; padding:12px; border-top:1px solid var(--card-border); background:rgba(0,0,0,0.2); }
-.case-player.show { display:block; }
-.case-player audio { width:100%; border-radius:6px; }
+/* Cases in preview */
+.cases-in-preview { margin-top:20px; }
+.cases-divider { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.cases-divider::after { content:''; flex:1; height:1px; background:var(--card-border); }
+.cases-divider span { font-size:12px; font-weight:600; color:var(--text-secondary); white-space:nowrap; }
+.cases-list { display:flex; flex-direction:column; gap:10px; }
+.case-item { display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--card-border); border-radius:var(--radius-xs); padding:8px; transition:var(--transition); }
+.case-item:hover { border-color:var(--primary); }
+.case-row { display:flex; gap:10px; }
+.case-thumb { width:64px; height:48px; border-radius:6px; object-fit:cover; cursor:pointer; flex-shrink:0; transition:var(--transition); }
+.case-thumb:hover { opacity:0.8; }
+.case-detail { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; }
+.case-title { font-size:13px; font-weight:700; margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.case-tag { background:rgba(108,92,231,0.12); color:#A78BFA; font-size:10px; padding:2px 8px; border-radius:8px; display:inline-block; width:fit-content; margin-bottom:4px; }
+.case-play-btn { background:none; border:1px solid var(--card-border); color:var(--text-secondary); font-size:11px; padding:3px 10px; border-radius:6px; cursor:pointer; transition:var(--transition); align-self:flex-start; }
+.case-play-btn:hover { border-color:var(--primary); color:var(--primary); }
+.case-play-btn.playing { background:var(--primary); color:white; border-color:var(--primary); }
+.case-audio { margin-top:6px; display:none; }
+.case-audio.show { display:block; }
+.case-audio audio { width:100%; border-radius:6px; }
+
+/* Lightbox */
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:200; align-items:center; justify-content:center; }
+.lightbox.show { display:flex; }
+.lightbox img { max-width:90%; max-height:85%; border-radius:8px; }
+.lightbox-close { position:fixed; top:16px; right:24px; color:white; font-size:32px; cursor:pointer; line-height:1; }
 
 /* Share */
 .share-box { background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:var(--radius-xs); padding:10px; margin-top:10px; }
@@ -209,7 +221,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
     .waveform-bar { width:3px; }
     .btn { padding:10px; font-size:13px; }
     .modal-box { margin:0 12px; padding:20px; }
-    .cases-grid { grid-template-columns:1fr 1fr; }
+    .case-thumb { width:56px; height:42px; }
     .case-title { font-size:12px; }
 }
 </style>
@@ -237,16 +249,6 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                     <div class="hero-step-label">听歌</div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="card cases-section">
-        <div class="card-header">
-            <div class="card-icon pink">✨</div>
-            <div><h3>精选案例</h3><p>先听听已有的 AI 生成歌曲</p></div>
-        </div>
-        <div class="card-body">
-            <div class="cases-grid" id="casesGrid"></div>
         </div>
     </div>
 
@@ -343,7 +345,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                 <div class="empty-state" id="audioEmpty">
                     <div class="empty-icon">🎧</div>
                     <div class="empty-title">等待生成</div>
-                    <div class="empty-desc">歌曲生成后会在这里播放</div>
+                    <div class="empty-desc">生成后你的歌曲会出现在这里<br>也可以先听听下方的效果</div>
                 </div>
                 <div id="audioLoading" style="display:none;">
                     <div class="loading-ring"></div>
@@ -373,6 +375,12 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                         </div>
                     </div>
                 </div>
+
+                <!-- 听听效果 -->
+                <div class="cases-in-preview">
+                    <div class="cases-divider"><span>🎵 听听效果</span></div>
+                    <div class="cases-list" id="casesGrid"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -395,6 +403,11 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
             <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">没有图？去 <a href="https://www.processon.com?utm_source=diagram2music" target="_blank" style="color:#A78BFA;">ProcessOn</a> 免费在线作图</div>
         </div>
     </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close">&times;</span>
+    <img id="lightboxImg" src="" alt="">
 </div>
 
 <script>
@@ -758,40 +771,80 @@ function loadCases() {
     fetch('/api/cases').then(function(r){ return r.json(); }).then(function(data){
         var grid = document.getElementById('casesGrid');
         if (!data.cases || !data.cases.length) {
-            grid.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px 0;width:100%;">暂无精选案例</div>';
+            grid.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:12px 0;width:100%;">暂无案例</div>';
             return;
         }
         data.cases.forEach(function(c){
-            var card = document.createElement('div');
-            card.className = 'case-card';
-            card.innerHTML =
-                '<img class="case-thumb" src="' + c.image + '" alt="' + c.title + '">' +
-                '<div class="case-info">' +
-                    '<div class="case-title">' + c.title + '</div>' +
-                    '<div class="case-meta">' +
+            var item = document.createElement('div');
+            item.className = 'case-item';
+            item.innerHTML =
+                '<div class="case-row">' +
+                    '<img class="case-thumb" src="' + c.image + '" alt="' + c.title + '" onclick="openLightbox(\'' + c.image + '\')" title="点击查看大图">' +
+                    '<div class="case-detail">' +
+                        '<div class="case-title">' + c.title + '</div>' +
                         '<span class="case-tag">' + (c.style_name || c.style) + '</span>' +
-                        '<span class="case-play">▶ 播放</span>' +
+                        '<button class="case-play-btn" id="caseBtn-' + c.id + '" onclick="toggleCasePlay(\'' + c.id + '\')">▶ 播放</button>' +
                     '</div>' +
                 '</div>' +
-                '<div class="case-player" id="casePlayer-' + c.id + '">' +
-                    '<audio controls src="' + c.audio + '"></audio>' +
+                '<div class="case-audio" id="caseAudio-' + c.id + '">' +
+                    '<audio controls src="' + c.audio + '" onended="resetCaseBtn(\'' + c.id + '\')"></audio>' +
                 '</div>';
-            card.onclick = function(e) {
-                if (e.target.tagName === 'AUDIO') return;
-                var player = document.getElementById('casePlayer-' + c.id);
-                var wasOpen = player.classList.contains('show');
-                document.querySelectorAll('.case-player').forEach(function(p){ p.classList.remove('show'); var a = p.querySelector('audio'); if (a) a.pause(); });
-                if (!wasOpen) {
-                    player.classList.add('show');
-                    player.querySelector('audio').play();
-                }
-            };
-            grid.appendChild(card);
+            grid.appendChild(item);
         });
     }).catch(function(){
-        document.getElementById('casesGrid').innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px 0;width:100%;">案例加载失败</div>';
+        document.getElementById('casesGrid').innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:12px 0;width:100%;">案例加载失败</div>';
     });
 }
+
+function toggleCasePlay(id) {
+    var audioDiv = document.getElementById('caseAudio-' + id);
+    var btn = document.getElementById('caseBtn-' + id);
+    var audio = audioDiv.querySelector('audio');
+    var isPlaying = !audio.paused;
+    
+    // 停止其他正在播放的案例
+    document.querySelectorAll('.case-audio.show').forEach(function(d){
+        if (d.id !== 'caseAudio-' + id) {
+            d.classList.remove('show');
+            d.querySelector('audio').pause();
+            var otherId = d.id.replace('caseAudio-','');
+            var otherBtn = document.getElementById('caseBtn-' + otherId);
+            if (otherBtn) { otherBtn.textContent = '▶ 播放'; otherBtn.classList.remove('playing'); }
+        }
+    });
+    
+    if (isPlaying) {
+        audio.pause();
+        btn.textContent = '▶ 播放';
+        btn.classList.remove('playing');
+        audioDiv.classList.remove('show');
+    } else {
+        audioDiv.classList.add('show');
+        audio.play();
+        btn.textContent = '⏸ 暂停';
+        btn.classList.add('playing');
+    }
+}
+
+function resetCaseBtn(id) {
+    var btn = document.getElementById('caseBtn-' + id);
+    var audioDiv = document.getElementById('caseAudio-' + id);
+    if (btn) { btn.textContent = '▶ 播放'; btn.classList.remove('playing'); }
+    if (audioDiv) audioDiv.classList.remove('show');
+}
+
+function openLightbox(url) {
+    document.getElementById('lightboxImg').src = url;
+    document.getElementById('lightbox').classList.add('show');
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('show');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+});
 
 loadCases();
 
