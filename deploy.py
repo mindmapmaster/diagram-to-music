@@ -22,8 +22,8 @@ def run(cmd, desc=""):
 # Step 1: Update system and install dependencies
 run("apt-get update -qq && apt-get install -y -qq python3-pip git nginx 2>&1 | tail -3", "安装 Python/Git/Nginx")
 
-# Step 2: Clone repo
-run("rm -rf /opt/diagram-to-music 2>/dev/null; git clone https://github.com/mindmapmaster/diagram-to-music.git /opt/diagram-to-music", "克隆代码")
+# Step 2: Clone or update repo (preserves results/ data)
+run("if [ -d /opt/diagram-to-music/.git ]; then cd /opt/diagram-to-music && git fetch origin && git reset --hard origin/master; else rm -rf /opt/diagram-to-music && git clone https://github.com/mindmapmaster/diagram-to-music.git /opt/diagram-to-music; fi", "拉取最新代码")
 
 # Step 3: Install Python deps
 run("pip3 install flask requests gunicorn Pillow 2>&1 | tail -5", "安装 Python 依赖")
