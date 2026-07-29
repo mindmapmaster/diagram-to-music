@@ -116,8 +116,13 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 .muted { opacity:0.3; pointer-events:none; }
 
 /* Lyrics */
-.lyrics-line { padding:4px 0; font-size:13px; line-height:1.8; }
+.lyrics-section { margin-bottom:16px; }
+.lyrics-section-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.lyrics-section-tag { background:linear-gradient(135deg, #6C5CE7, #A78BFA); color:#fff; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px; }
+.lyrics-section-marker { color:#A78BFA; font-size:12px; font-weight:600; }
+.lyrics-line { padding:3px 0; font-size:13px; line-height:1.8; color:var(--text-secondary); }
 .lyrics-label { color:#A78BFA; font-weight:700; margin-top:12px; margin-bottom:4px; font-size:12px; }
+.lyrics-empty { text-align:center; color:var(--text-muted); font-size:12px; padding:20px 0; }
 
 /* Audio */
 .audio-player { margin-top:10px; }
@@ -623,20 +628,50 @@ function resetGenerateBtn() {
 function renderLyrics(text) {
     var c = document.getElementById('lyricsContent');
     c.innerHTML = '';
+    if (!text || !text.trim()) {
+        var empty = document.createElement('div');
+        empty.className = 'lyrics-empty';
+        empty.textContent = '未获取到歌词内容';
+        c.appendChild(empty);
+        return;
+    }
     var lines = text.split('\n');
+    var sectionDiv = null;
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i].trim();
         if (!line) continue;
-        if (line.indexOf('\u3010') === 0) {
-            var l = document.createElement('div');
-            l.className = 'lyrics-label';
-            l.textContent = line;
-            c.appendChild(l);
+        var sectionMatch = line.match(/^\[(verse|chorus|bridge|outro|intro|pre-chorus|hook)\s*(\d*)\]/i);
+        if (sectionMatch) {
+            var sectionName = sectionMatch[1].toUpperCase();
+            var sectionNum = sectionMatch[2] ? ' ' + sectionMatch[2] : '';
+            var header = document.createElement('div');
+            header.className = 'lyrics-section-header';
+            var tag = document.createElement('span');
+            tag.className = 'lyrics-section-tag';
+            tag.textContent = sectionName;
+            var marker = document.createElement('span');
+            marker.className = 'lyrics-section-marker';
+            marker.textContent = '[' + sectionMatch[1] + sectionNum + ']';
+            header.appendChild(tag);
+            header.appendChild(marker);
+            c.appendChild(header);
+            sectionDiv = document.createElement('div');
+            sectionDiv.className = 'lyrics-section';
+            c.appendChild(sectionDiv);
+        } else if (line.indexOf('【') === 0) {
+            var label = document.createElement('div');
+            label.className = 'lyrics-label';
+            label.textContent = line;
+            c.appendChild(label);
+            sectionDiv = document.createElement('div');
+            sectionDiv.className = 'lyrics-section';
+            c.appendChild(sectionDiv);
         } else {
             var d = document.createElement('div');
             d.className = 'lyrics-line';
             d.textContent = line;
-            c.appendChild(d);
+            if (sectionDiv) sectionDiv.appendChild(d);
+            else c.appendChild(d);
         }
     }
 }
