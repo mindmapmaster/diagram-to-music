@@ -296,9 +296,14 @@ def song_download():
         return jsonify({"error": "缺少 url 参数"}), 400
 
     resp = _session.get(mp3_url, timeout=60)
+    filename = request.args.get("filename", "song.mp3")
+    # 安全处理文件名，防止路径遍历
+    filename = filename.replace("\\", "_").replace("/", "_").replace("..", "_")
+    if not filename.endswith(".mp3"):
+        filename += ".mp3"
     return resp.content, 200, {
         "Content-Type": "audio/mpeg",
-        "Content-Disposition": "attachment; filename=song.mp3",
+        "Content-Disposition": f"attachment; filename={filename}",
     }
 
 

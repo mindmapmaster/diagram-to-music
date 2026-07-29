@@ -132,16 +132,26 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 
 /* Song Result */
 .song-result { text-align:center; padding:8px 0; }
-.song-disc { width:64px; height:64px; margin:0 auto 12px; border-radius:50%; background:#1a1a1a; border:3px solid #333; position:relative; display:flex; align-items:center; justify-content:center; }
-.song-disc::before { content:''; position:absolute; inset:6px; border-radius:50%; border:1px solid rgba(255,255,255,0.06); }
-.song-disc-inner { width:20px; height:20px; border-radius:50%; background:linear-gradient(135deg,#6C5CE7,#A78BFA); box-shadow:0 0 8px rgba(108,92,231,0.3); }
-.song-disc.spinning { animation:discSpin 4s linear infinite; }
-@keyframes discSpin { to { transform:rotate(360deg); } }
-.song-title { font-size:16px; font-weight:700; margin-bottom:6px; }
-.song-tags { display:flex; gap:6px; justify-content:center; margin-bottom:8px; flex-wrap:wrap; }
+.album-cover { width:100%; aspect-ratio:1; border-radius:16px; background:linear-gradient(135deg,#FF6B9D 0%,#6C5CE7 50%,#00D2FF 100%); position:relative; overflow:hidden; margin-bottom:16px; box-shadow:0 10px 40px rgba(108,92,231,0.25); }
+.album-cover::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 30% 20%,rgba(255,255,255,0.25),transparent 50%); }
+.album-cover::after { content:''; position:absolute; bottom:-30%; left:-30%; width:160%; height:160%; background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 60%); }
+.album-disc { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:42%; height:42%; border-radius:50%; background:rgba(0,0,0,0.18); border:2px solid rgba(255,255,255,0.25); backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:center; }
+.album-disc::after { content:''; width:22%; height:22%; border-radius:50%; background:rgba(255,255,255,0.5); box-shadow:0 0 20px rgba(255,255,255,0.3); }
+.album-cover.spinning .album-disc { animation:discSpin 8s linear infinite; }
+@keyframes discSpin { to { transform:translate(-50%,-50%) rotate(360deg); } }
+.song-title { font-size:18px; font-weight:700; margin-bottom:4px; }
+.song-tags { display:flex; gap:6px; justify-content:center; margin-bottom:10px; flex-wrap:wrap; }
 .song-tag { background:rgba(108,92,231,0.15); color:#A78BFA; font-size:10px; padding:2px 10px; border-radius:10px; }
-.song-summary { font-size:12px; color:var(--text-muted); line-height:1.6; margin-bottom:12px; padding:0 8px; }
-.download-btn { margin-top:10px; width:auto; padding:10px 28px; }
+.song-meta-label { font-size:11px; color:var(--text-muted); margin-top:10px; }
+.song-summary { font-size:12px; color:var(--text-secondary); line-height:1.6; margin:6px 0 10px; padding:0 8px; }
+.waveform { display:flex; align-items:center; justify-content:center; gap:3px; height:36px; margin:12px 0; }
+.waveform-bar { width:4px; min-height:6px; background:linear-gradient(to top,#6C5CE7,#FF6B9D); border-radius:2px; animation:wave 1.2s ease-in-out infinite; }
+@keyframes wave { 0%,100%{height:20%} 50%{height:80%} }
+.song-meta { display:flex; justify-content:space-around; margin:12px 0; text-align:center; }
+.song-meta div span { display:block; font-size:15px; font-weight:700; color:var(--text); }
+.song-meta div small { display:block; font-size:10px; color:var(--text-muted); margin-top:2px; }
+.download-btn { margin-top:12px; width:100%; display:inline-block; text-align:center; text-decoration:none; }
+.download-btn.disabled { opacity:0.5; pointer-events:none; }
 
 /* Mobile */
 @media (max-width:640px) {
@@ -166,9 +176,10 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
     .sample-icon-img { width:24px; height:24px; }
     .step-row { flex-wrap:wrap; gap:4px; }
     .step-row a { font-size:9px; }
-    .song-disc { width:52px; height:52px; }
-    .song-disc-inner { width:16px; height:16px; }
-    .song-title { font-size:14px; }
+    .album-cover { border-radius:12px; }
+    .song-title { font-size:15px; }
+    .song-summary { font-size:11px; }
+    .waveform-bar { width:3px; }
     .btn { padding:10px; font-size:13px; }
     .modal-box { margin:0 12px; padding:20px; }
 }
@@ -301,16 +312,22 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                     <div style="font-size:11px;color:var(--text-muted);text-align:center;">大约 20-30 秒</div>
                 </div>
                 <div class="song-result" id="audioPlayer" style="display:none;">
-                    <div class="song-disc" id="songDisc">
-                        <div class="song-disc-inner"></div>
+                    <div class="album-cover" id="albumCover">
+                        <div class="album-disc"></div>
                     </div>
                     <div class="song-title" id="songTitle">AI 创作歌曲</div>
                     <div class="song-tags" id="songTags"></div>
+                    <div class="song-meta-label" id="summaryLabel" style="display:none;">摘要</div>
                     <div class="song-summary" id="songSummary"></div>
+                    <div class="waveform" id="waveform"></div>
+                    <div class="song-meta">
+                        <div><span id="duration">0:00</span><small>时长</small></div>
+                        <div><span>MP3</span><small>格式</small></div>
+                    </div>
                     <div class="audio-player">
                         <audio id="audioEl" controls></audio>
                     </div>
-                    <button class="btn btn-primary download-btn" onclick="downloadSong()">📥 下载歌曲</button>
+                    <a class="btn btn-primary download-btn" id="downloadLink" href="javascript:void(0)" onclick="return handleDownload()">📥 下载歌曲</a>
                 </div>
             </div>
         </div>
@@ -454,18 +471,41 @@ function resetAll() {
 }
 
 // ===== 样例 =====
+function svgToPng(svgDataUrl, callback) {
+    var img = new Image();
+    img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var size = 800;
+        canvas.width = size;
+        canvas.height = size;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(img, 0, 0, size, size);
+        callback(canvas.toDataURL('image/png'));
+    };
+    img.onerror = function() { callback(svgDataUrl); };
+    img.src = svgDataUrl;
+}
+
 function loadSample(type) {
     fetch(SAMPLE_FILES[type]).then(function(r) { return r.blob(); }).then(function(b) {
         var reader = new FileReader();
         reader.onload = function(e) {
-            imageDataUrl = e.target.result;
-            showPreview(e.target.result, SAMPLE_VIEWS[type]);
-            document.getElementById('sampleSection').classList.remove('muted');
-            document.getElementById('uploadText').textContent = '已加载：' + ({mindmap:'思维导图',flowchart:'流程图',notes:'思维笔记'})[type] + '样例';
-            document.getElementById('uploadText').style.color = '#10B981';
-            document.getElementById('uploadZone').classList.add('active');
-            document.getElementById('validateModal').style.display = 'none';
-            forceMode = true;
+            var dataUrl = e.target.result;
+            var isSvg = dataUrl.indexOf('image/svg') !== -1 || dataUrl.indexOf('data:image/svg') !== -1;
+            var finish = function(url) {
+                imageDataUrl = url;
+                showPreview(url, SAMPLE_VIEWS[type]);
+                document.getElementById('sampleSection').classList.remove('muted');
+                document.getElementById('uploadText').textContent = '已加载：' + ({mindmap:'思维导图',flowchart:'流程图',notes:'思维笔记'})[type] + '样例';
+                document.getElementById('uploadText').style.color = '#10B981';
+                document.getElementById('uploadZone').classList.add('active');
+                document.getElementById('validateModal').style.display = 'none';
+                forceMode = true;
+            };
+            if (isSvg) svgToPng(dataUrl, finish);
+            else finish(dataUrl);
         };
         reader.readAsDataURL(b);
     });
@@ -552,7 +592,21 @@ async function doGenerate() {
         tag.className = 'song-tag';
         tag.textContent = tagName;
         tagsEl.appendChild(tag);
-        document.getElementById('songSummary').textContent = d.summary || '';
+
+        var summary = (d.summary || '').trim();
+        var summaryEl = document.getElementById('songSummary');
+        var summaryLabel = document.getElementById('summaryLabel');
+        if (summary) {
+            summaryEl.textContent = summary;
+            summaryEl.style.display = 'block';
+            summaryLabel.style.display = 'block';
+        } else {
+            summaryEl.style.display = 'none';
+            summaryLabel.style.display = 'none';
+        }
+
+        generateWaveform();
+        updateDuration();
         document.getElementById('audioStatus').textContent = '歌曲就绪';
         resetGenerateBtn();
     } catch(err) {
@@ -587,42 +641,60 @@ function renderLyrics(text) {
     }
 }
 
-async function downloadSong() {
-    if (!currentMp3Url) return;
-    var btn = document.querySelector('.download-btn');
-    if (!btn) return;
+function handleDownload() {
+    if (!currentMp3Url) return false;
+    var isWechat = /MicroMessenger/i.test(navigator.userAgent);
+    if (isWechat) {
+        alert('微信内无法直接下载音频，请点击右上角「⋯」→「在浏览器打开」，然后在浏览器中点击下载');
+        return false;
+    }
+    var btn = document.getElementById('downloadLink');
     var originalText = btn.textContent;
-    btn.textContent = '⏳ 下载中...';
-    btn.disabled = true;
-    try {
-        var resp = await fetch('/api/song/download?url=' + encodeURIComponent(currentMp3Url));
-        var blob = await resp.blob();
-        var file = new File([blob], 'AI歌曲.mp3', {type: 'audio/mpeg'});
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: '我生成的AI歌曲' });
-        } else {
-            var a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'AI歌曲.mp3';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
-        }
-    } catch(err) {
-        if (err.name !== 'AbortError') alert('下载失败：' + err.message);
-    } finally {
+    btn.textContent = '⏳ 准备下载...';
+    btn.classList.add('disabled');
+    setTimeout(function() {
         btn.textContent = originalText;
-        btn.disabled = false;
+        btn.classList.remove('disabled');
+    }, 1500);
+    window.location.href = '/api/song/download?url=' + encodeURIComponent(currentMp3Url) + '&filename=' + encodeURIComponent((document.getElementById('songTitle').textContent || 'AI歌曲') + '.mp3');
+    return false;
+}
+
+function generateWaveform() {
+    var container = document.getElementById('waveform');
+    container.innerHTML = '';
+    var count = window.innerWidth < 640 ? 28 : 40;
+    for (var i = 0; i < count; i++) {
+        var bar = document.createElement('div');
+        bar.className = 'waveform-bar';
+        bar.style.height = (20 + Math.random() * 60) + '%';
+        bar.style.animationDelay = (Math.random() * 1) + 's';
+        container.appendChild(bar);
     }
 }
 
+function formatTime(sec) {
+    if (!isFinite(sec) || sec < 0) return '0:00';
+    var m = Math.floor(sec / 60);
+    var s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function updateDuration() {
+    var audio = document.getElementById('audioEl');
+    var update = function() {
+        document.getElementById('duration').textContent = formatTime(audio.duration);
+    };
+    if (audio.readyState >= 1) update();
+    audio.addEventListener('loadedmetadata', update);
+    audio.addEventListener('durationchange', update);
+}
+
 document.getElementById('audioEl').addEventListener('play', function() {
-    document.getElementById('songDisc').classList.add('spinning');
+    document.getElementById('albumCover').classList.add('spinning');
 });
 document.getElementById('audioEl').addEventListener('pause', function() {
-    document.getElementById('songDisc').classList.remove('spinning');
+    document.getElementById('albumCover').classList.remove('spinning');
 });
 
 fetch('/api/health').then(function(r) { return r.json(); }).then(function(d) {
