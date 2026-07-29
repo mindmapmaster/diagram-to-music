@@ -6,550 +6,149 @@
 <title>图生成歌曲 - AI 为你写歌</title>
 <style>
 :root {
-    --bg: #0A0A0F;
-    --surface: #14141A;
-    --surface-hover: #1C1C24;
-    --card: #18181F;
-    --card-border: #24242D;
-    --text: #F0F0F5;
-    --text-secondary: #A0A0B0;
-    --text-muted: #6A6A7A;
-    --primary: #6C5CE7;
-    --primary-glow: rgba(108,92,231,0.4);
-    --accent: #FF6B9D;
-    --accent-glow: rgba(255,107,157,0.3);
-    --cyan: #00D2FF;
-    --cyan-glow: rgba(0,210,255,0.3);
-    --success: #10B981;
-    --error: #FF4D4F;
-    --radius: 14px;
-    --radius-lg: 20px;
-    --radius-sm: 10px;
-    --radius-xs: 8px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --shadow: 0 4px 24px rgba(0,0,0,0.3);
-    --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+    --bg: #0D0D12; --surface: #14141A; --card-bg: #1A1A22; --card-border: #24242D;
+    --text: #E8E8ED; --text-secondary: #9CA3AF; --text-muted: #6B7280;
+    --primary: #6C5CE7; --primary-hover: #7C6CF7; --accent: #FF6B9D;
+    --success: #10B981; --error: #FF4D4F;
+    --radius: 12px; --radius-xs: 8px; --transition: all 0.2s ease;
 }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; min-height:100vh; padding:20px; }
+.container { max-width:1200px; margin:0 auto; }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* Hero */
+.hero { text-align:center; padding:32px 0 20px; }
+.hero-badge { display:inline-block; background:rgba(108,92,231,0.15); color:#A78BFA; padding:4px 14px; border-radius:20px; font-size:11px; font-weight:600; letter-spacing:0.1em; margin-bottom:12px; }
+.hero-title { font-size:28px; font-weight:800; margin-bottom:6px; }
+.hero-desc { color:var(--text-muted); font-size:14px; }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-    overflow-x: hidden;
-}
+/* Layout */
+.main-grid { display:grid; grid-template-columns:360px 1fr 1fr; gap:16px; }
+@media (max-width:1100px) { .main-grid { grid-template-columns:1fr; } }
 
-/* ====== HERO ====== */
-.hero {
-    position: relative;
-    padding: 40px 24px 60px;
-    text-align: center;
-    overflow: hidden;
-    background: linear-gradient(180deg, #1a1040 0%, #0f0a2e 40%, var(--bg) 100%);
-}
-.hero::before {
-    content: '';
-    position: absolute; top: -50%; left: 50%;
-    transform: translateX(-50%);
-    width: 700px; height: 700px;
-    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
-    pointer-events: none;
-}
-.hero::after {
-    content: '';
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 120px;
-    background: linear-gradient(to top, var(--bg), transparent);
-    z-index: 1;
-}
-.hero-inner {
-    position: relative; z-index: 2;
-    max-width: 900px; margin: 0 auto;
-}
-.hero-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 14px;
-    background: rgba(108,92,231,0.15);
-    border: 1px solid rgba(108,92,231,0.3);
-    border-radius: 99px;
-    font-size: 12px; font-weight: 600;
-    color: #A78BFA; letter-spacing: 0.06em;
-    margin-bottom: 20px;
-}
-.hero-title {
-    font-size: 42px; font-weight: 800;
-    background: linear-gradient(135deg, #C4B5FD 0%, #A78BFA 30%, #F0ABFC 70%, #F9A8D4 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.3; margin-bottom: 12px;
-    letter-spacing: -0.02em;
-}
-.hero-desc {
-    font-size: 15px; color: var(--text-secondary);
-    max-width: 460px; margin: 0 auto 28px;
-    line-height: 1.7;
-}
-.hero-flow {
-    display: flex; align-items: center; justify-content: center;
-    gap: 20px;
-}
-.hero-step {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-}
-.hero-step-icon {
-    width: 52px; height: 52px;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    transition: var(--transition);
-}
-.hero-step:hover .hero-step-icon {
-    background: rgba(108,92,231,0.2);
-    border-color: rgba(108,92,231,0.4);
-    transform: translateY(-2px);
-}
-.hero-step-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-.hero-arrow { font-size: 18px; color: var(--text-muted); margin-bottom: 8px; }
+/* Cards */
+.card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); overflow:hidden; }
+.card-header { padding:16px 20px; border-bottom:1px solid var(--card-border); display:flex; align-items:center; gap:12px; }
+.card-header h3 { font-size:14px; font-weight:700; }
+.card-header p { font-size:11px; color:var(--text-muted); }
+.card-body { padding:16px 20px; }
+.card-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.card-icon.purple { background:rgba(108,92,231,0.15); }
+.card-icon.pink { background:rgba(255,107,157,0.15); }
+.card-icon.cyan { background:rgba(0,210,255,0.15); }
 
-/* ====== 布局 ====== */
-.container {
-    max-width: 1200px;
-    margin: -32px auto 0;
-    padding: 0 24px 32px;
-    position: relative; z-index: 10;
-}
-.grid {
-    display: grid;
-    grid-template-columns: 340px 1fr 300px;
-    gap: 16px; align-items: start;
-}
+/* Upload */
+.upload-zone { border:2px dashed var(--card-border); border-radius:var(--radius); padding:28px 16px; text-align:center; cursor:pointer; transition:var(--transition); background:rgba(255,255,255,0.02); }
+.upload-zone:hover { border-color:var(--primary); background:rgba(108,92,231,0.04); }
+.upload-zone.active { border-color:var(--success); background:rgba(16,185,129,0.04); }
+.upload-icon { font-size:32px; display:block; margin-bottom:6px; }
+.upload-text { font-size:13px; font-weight:600; margin-bottom:2px; }
+.upload-hint { font-size:11px; color:var(--text-muted); }
+.upload-hint a { color:var(--primary); text-decoration:underline; cursor:pointer; }
 
-/* ====== 卡片通用 ====== */
-.card {
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-}
-.card-header {
-    padding: 18px 20px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    display: flex; align-items: center; gap: 10px;
-}
-.card-header-icon {
-    width: 34px; height: 34px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-}
-.card-header-icon.purple { background: rgba(108,92,231,0.15); color: #A78BFA; }
-.card-header-icon.pink { background: rgba(255,107,157,0.15); color: #F472B6; }
-.card-header-icon.cyan { background: rgba(0,210,255,0.12); color: #22D3EE; }
-.card-header-text h3 { font-size: 15px; font-weight: 700; }
-.card-header-text p { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-.card-body { padding: 18px 20px; }
+/* Preview */
+.preview-wrap { position:relative; margin-top:10px; border-radius:var(--radius-xs); overflow:hidden; border:1px solid var(--card-border); }
+.preview-wrap img { width:100%; display:block; }
+.preview-badge { position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.7); color:white; font-size:10px; padding:3px 8px; border-radius:4px; display:flex; align-items:center; gap:4px; }
+.preview-link { position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.7); color:#A78BFA; font-size:10px; padding:3px 8px; border-radius:4px; text-decoration:none; }
+.preview-link:hover { text-decoration:underline; }
+.preview-clear { cursor:pointer; opacity:0.7; margin-left:4px; }
+.preview-clear:hover { opacity:1; }
 
-/* ====== 表单控件 ====== */
-.form-label {
-    font-size: 11px; font-weight: 600; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
-}
+/* Styles */
+.style-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+.style-card { padding:10px 4px; border:1px solid var(--card-border); border-radius:var(--radius-xs); cursor:pointer; text-align:center; transition:var(--transition); background:var(--surface); }
+.style-card:hover { border-color:var(--primary); background:rgba(108,92,231,0.06); transform:translateY(-1px); }
+.style-card.selected { border-color:var(--accent); background:rgba(255,107,157,0.12); box-shadow:0 0 12px rgba(255,107,157,0.15); }
+.style-emoji { font-size:18px; display:block; margin-bottom:2px; }
+.style-name { font-size:11px; font-weight:600; color:var(--text-secondary); }
+.style-card.selected .style-name { color:#F472B6; }
 
-/* 上传区 */
-.upload-zone {
-    border: 2px dashed rgba(255,255,255,0.1);
-    border-radius: var(--radius);
-    padding: 32px 16px;
-    text-align: center; cursor: pointer;
-    transition: var(--transition);
-    background: rgba(255,255,255,0.02);
-    position: relative; overflow: hidden;
-}
-.upload-zone::before {
-    content: ''; position: absolute; inset: 0;
-    opacity: 0; transition: opacity 0.3s;
-    background: radial-gradient(circle at 50% 50%, var(--primary-glow) 0%, transparent 60%);
-}
-.upload-zone:hover::before, .upload-zone.dragover::before { opacity: 1; }
-.upload-zone:hover, .upload-zone.dragover {
-    border-color: var(--primary);
-    background: rgba(108,92,231,0.05);
-}
-.upload-icon { font-size: 36px; margin-bottom: 10px; display: block; position: relative; z-index: 1; }
-.upload-text { font-size: 13px; color: var(--text); font-weight: 600; position: relative; z-index: 1; }
-.upload-hint { font-size: 11px; color: var(--text-muted); position: relative; z-index: 1; }
+/* Buttons */
+.btn { width:100%; padding:12px; border:none; border-radius:var(--radius-xs); font-size:14px; font-weight:600; cursor:pointer; transition:var(--transition); }
+.btn-primary { background:var(--primary); color:white; }
+.btn-primary:hover { background:var(--primary-hover); }
+.btn-primary:disabled { opacity:0.4; cursor:not-allowed; }
+.btn-ghost { background:transparent; color:var(--text-muted); border:1px solid var(--card-border); }
 
-/* 图片类型 */
-.type-row { display: flex; gap: 6px; margin-top: 12px; }
-.type-btn {
-    flex: 1; padding: 10px 4px;
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-xs);
-    background: var(--surface);
-    font-size: 12px; color: var(--text-muted);
-    cursor: pointer; transition: var(--transition);
-    text-align: center; font-family: inherit; font-weight: 500;
-}
-.type-btn:hover { border-color: rgba(108,92,231,0.4); color: #A78BFA; }
-.type-btn.selected {
-    border-color: var(--primary);
-    background: rgba(108,92,231,0.12);
-    color: #A78BFA; font-weight: 600;
-}
+/* Dividers & Labels */
+.divider { border:none; border-top:1px solid var(--card-border); margin:16px 0; }
+.step-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+.step-num { width:20px; height:20px; border-radius:50%; background:var(--primary); color:white; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+.step-label { font-size:12px; font-weight:600; }
+.section-label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
 
-/* 曲风选择 */
-.style-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-.style-card {
-    padding: 12px 6px;
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-xs);
-    cursor: pointer; text-align: center;
-    transition: var(--transition);
-    background: var(--surface);
-}
-.style-card:hover {
-    border-color: rgba(255,107,157,0.4);
-    background: rgba(255,107,157,0.06);
-    transform: translateY(-1px);
-}
-.style-card.selected {
-    border-color: var(--accent);
-    background: rgba(255,107,157,0.12);
-    box-shadow: 0 0 12px rgba(255,107,157,0.15);
-}
-.style-emoji { font-size: 20px; display: block; margin-bottom: 3px; }
-.style-name { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
-.style-card.selected .style-name { color: #F472B6; }
+/* Error */
+.error-box { display:none; background:rgba(255,77,79,0.1); border:1px solid rgba(255,77,79,0.3); color:#FF4D4F; padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:10px; }
+.error-box.show { display:block; }
 
-/* 样例卡片样式覆盖 */
-.style-card.sample-card-btn:hover {
-    border-color: var(--primary);
-    background: rgba(108,92,231,0.06);
-    box-shadow: none;
-}
+/* Loading */
+.loading-ring { width:32px; height:32px; border:3px solid var(--card-border); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; margin:20px auto; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-text { text-align:center; font-size:12px; color:var(--text-muted); }
 
-/* 图片预览 */
-.preview-wrap {
-    margin-top: 10px; border-radius: var(--radius);
-    overflow: hidden; border: 2px solid var(--primary);
-    box-shadow: 0 0 16px var(--primary-glow);
-    position: relative;
-}
-.preview-wrap img { width: 100%; display: block; }
-.preview-badge {
-    position: absolute; top: 8px; right: 8px;
-    padding: 3px 10px; background: var(--primary);
-    color: white; border-radius: 99px;
-    font-size: 10px; font-weight: 700;
-}
+/* Empty */
+.empty-state { text-align:center; padding:40px 20px; }
+.empty-icon { font-size:36px; margin-bottom:8px; opacity:0.5; }
+.empty-title { font-size:14px; font-weight:600; margin-bottom:4px; }
+.empty-desc { font-size:12px; color:var(--text-muted); }
 
-/* 按钮 */
-.btn {
-    width: 100%; padding: 14px;
-    border: none; border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 700; cursor: pointer;
-    transition: var(--transition); font-family: inherit;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    letter-spacing: 0.02em;
-}
-.btn-primary {
-    background: linear-gradient(135deg, #6C5CE7, #8B5CF6);
-    color: white;
-    box-shadow: 0 4px 20px var(--primary-glow);
-    margin-top: 14px;
-}
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 28px var(--primary-glow);
-}
-.btn-primary:disabled {
-    background: var(--surface); box-shadow: none;
-    color: var(--text-muted); cursor: not-allowed;
-    transform: none; opacity: 0.5;
-}
-.btn-ghost {
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--card-border);
-    font-weight: 600;
-}
-.btn-ghost:hover { border-color: rgba(108,92,231,0.4); color: #A78BFA; }
+/* Modal */
+.modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; }
+.modal-box { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); padding:24px; max-width:380px; width:100%; text-align:center; }
+.modal-icon { font-size:40px; margin-bottom:8px; }
+.modal-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.modal-desc { font-size:12px; color:var(--text-muted); margin-bottom:12px; }
+.modal-actions { display:flex; flex-direction:column; gap:6px; }
 
-.divider { height: 1px; background: rgba(255,255,255,0.06); margin: 16px 0; }
+/* Muted */
+.muted { opacity:0.3; pointer-events:none; }
 
-/* ====== 歌词区 ====== */
-.lyric-block {
-    padding: 14px 16px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 10px;
-    border-left: 3px solid;
-    background: var(--surface);
-    animation: fadeUp 0.4s ease;
-}
-.lyric-block.verse { border-left-color: #6C5CE7; }
-.lyric-block.chorus { border-left-color: #FF6B9D; }
-.lyric-block.bridge { border-left-color: #00D2FF; }
-.lyric-label {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    margin-bottom: 6px;
-}
-.lyric-block.verse .lyric-label { color: #A78BFA; }
-.lyric-block.chorus .lyric-label { color: #F472B6; }
-.lyric-block.bridge .lyric-label { color: #22D3EE; }
-.lyric-text {
-    font-size: 13px; line-height: 1.9; color: var(--text-secondary);
-    white-space: pre-line;
-}
+/* Lyrics */
+.lyrics-line { padding:4px 0; font-size:13px; line-height:1.8; }
+.lyrics-label { color:#A78BFA; font-weight:700; margin-top:12px; margin-bottom:4px; font-size:12px; }
 
-/* ====== 音频结果 ====== */
-.album-art {
-    width: 100%; aspect-ratio: 1;
-    border-radius: var(--radius);
-    background: linear-gradient(135deg, #6C5CE7 0%, #FF6B9D 50%, #00D2FF 100%);
-    position: relative; overflow: hidden;
-    margin-bottom: 16px;
-}
-.album-art::before {
-    content: ''; position: absolute;
-    top: 20%; left: 20%; right: 20%; bottom: 20%;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.3);
-}
-.album-art-inner {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 40px;
-}
-.album-art.playing .album-art-inner {
-    animation: albumSpin 8s linear infinite;
-}
-@keyframes albumSpin { to { transform: rotate(360deg); } }
+/* Audio */
+.audio-player { margin-top:10px; }
+.audio-player audio { width:100%; border-radius:8px; }
+.download-link { display:inline-block; margin-top:8px; font-size:11px; color:var(--primary); cursor:pointer; text-decoration:underline; }
 
-.song-title-display {
-    font-size: 16px; font-weight: 700;
-    text-align: center; margin-bottom: 4px;
-}
-.song-summary-display {
-    font-size: 12px; color: var(--text-muted);
-    text-align: center; margin-bottom: 16px;
-    line-height: 1.5;
-}
-
-.stats-row { display: flex; gap: 6px; margin-bottom: 14px; }
-.stat-item {
-    flex: 1;
-    background: var(--surface);
-    border-radius: var(--radius-sm);
-    padding: 12px 6px; text-align: center;
-}
-.stat-num { font-size: 16px; font-weight: 700; color: #A78BFA; }
-.stat-label { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
-
-.audio-player-wrap {
-    background: var(--surface);
-    border-radius: var(--radius-sm);
-    padding: 14px;
-    margin-bottom: 12px;
-}
-.audio-player-wrap audio { width: 100%; border-radius: 6px; }
-
-.visualizer {
-    display: flex; align-items: flex-end; justify-content: center;
-    gap: 3px; height: 40px; margin-bottom: 12px;
-}
-.visualizer-bar {
-    width: 4px; border-radius: 2px;
-    background: linear-gradient(to top, #6C5CE7, #A78BFA);
-    animation: visualBounce 0.8s ease-in-out infinite alternate;
-}
-.visualizer-bar:nth-child(1) { height: 15px; animation-delay: 0s; }
-.visualizer-bar:nth-child(2) { height: 28px; animation-delay: 0.1s; }
-.visualizer-bar:nth-child(3) { height: 20px; animation-delay: 0.2s; }
-.visualizer-bar:nth-child(4) { height: 35px; animation-delay: 0.3s; }
-.visualizer-bar:nth-child(5) { height: 22px; animation-delay: 0.15s; }
-.visualizer-bar:nth-child(6) { height: 30px; animation-delay: 0.25s; }
-.visualizer-bar:nth-child(7) { height: 18px; animation-delay: 0.35s; }
-.visualizer-bar:nth-child(8) { height: 38px; animation-delay: 0.05s; }
-.visualizer-bar:nth-child(9) { height: 24px; animation-delay: 0.4s; }
-.visualizer-bar:nth-child(10) { height: 32px; animation-delay: 0.2s; }
-.visualizer-bar:nth-child(11) { height: 16px; animation-delay: 0.3s; }
-.visualizer-bar:nth-child(12) { height: 26px; animation-delay: 0.15s; }
-@keyframes visualBounce {
-    to { transform: scaleY(0.4); opacity: 0.6; }
-}
-
-/* ====== 空状态 ====== */
-.empty-state {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 48px 16px; text-align: center;
-    min-height: 250px;
-}
-.empty-icon {
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    background: var(--surface);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px; margin-bottom: 12px;
-    opacity: 0.5;
-}
-.empty-title { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
-.empty-desc { font-size: 12px; color: var(--text-muted); opacity: 0.6; max-width: 200px; }
-
-/* ====== 加载 ====== */
-.loading-state {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 48px 16px; text-align: center;
-}
-.loading-ring {
-    width: 48px; height: 48px; margin-bottom: 16px;
-    border: 3px solid rgba(108,92,231,0.15);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 13px; color: var(--text-muted); }
-.loading-sub { font-size: 11px; color: var(--text-muted); opacity: 0.6; margin-top: 4px; }
-
-/* ====== 错误 ====== */
-.error-box {
-    background: rgba(255,77,79,0.1);
-    border: 1px solid rgba(255,77,79,0.3);
-    color: #FF6B6B;
-    padding: 10px 12px; border-radius: var(--radius-xs);
-    font-size: 12px; margin-top: 10px;
-    display: none; line-height: 1.5;
-}
-.error-box.show { display: block; }
-
-/* ====== 底部 ====== */
-.footer {
-    text-align: center; padding: 20px 24px 36px;
-    font-size: 12px; color: var(--text-muted);
-    opacity: 0.5;
-}
-
-/* ====== 动画 ====== */
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ====== 响应式 ====== */
-@media (max-width: 1024px) {
-    .grid { grid-template-columns: 1fr; gap: 12px; }
-    .container { padding: 0 16px 24px; margin-top: -20px; }
-    .hero { padding: 32px 16px 48px; }
-    .hero-title { font-size: 30px; }
-}
-@media (max-width: 640px) {
-    .hero-title { font-size: 24px; }
-    .hero-step-icon { width: 40px; height: 40px; font-size: 18px; border-radius: 12px; }
-    .hero-flow { gap: 10px; }
-    .hero-arrow { font-size: 14px; }
-    .card-body { padding: 14px 14px; }
-    .card-header { padding: 14px 14px 10px; }
-    .style-grid { grid-template-columns: 1fr 1fr 1fr; }
-}
-
-/* ====== 弹窗 ====== */
-.modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 999; backdrop-filter: blur(4px);
-    animation: fadeIn 0.2s ease;
-}
-.modal-box {
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    padding: 32px 28px;
-    max-width: 440px; width: 90%;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-}
-.modal-icon { font-size: 44px; margin-bottom: 12px; }
-.modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-.modal-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
-.modal-actions { display: flex; flex-direction: column; gap: 8px; }
-.sample-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-.sample-card {
-    padding: 12px; border: 1px solid var(--card-border);
-    border-radius: var(--radius-sm); cursor: pointer;
-    background: var(--surface); transition: var(--transition); text-align: center;
-}
-.sample-card:hover { border-color: var(--primary); background: rgba(108,92,231,0.08); }
-.sample-card-icon { font-size: 28px; display: block; margin-bottom: 4px; }
-.sample-card-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+/* Footer */
+.footer { text-align:center; padding:20px; font-size:11px; color:var(--text-muted); }
 </style>
 </head>
 <body>
-
-<div class="hero">
-    <div class="hero-inner">
+<div class="container">
+    <div class="hero">
         <div class="hero-badge">🎵 DIAGRAM TO MUSIC</div>
         <h1 class="hero-title">上传图片，AI 为你写歌</h1>
         <p class="hero-desc">思维导图、流程图、思维笔记 — 任何图片都能变成一首专属歌曲</p>
-        <div class="hero-flow">
-            <div class="hero-step">
-                <div class="hero-step-icon">📸</div>
-                <div class="hero-step-label">上传图片</div>
-            </div>
-            <div class="hero-arrow">→</div>
-            <div class="hero-step">
-                <div class="hero-step-icon">🎨</div>
-                <div class="hero-step-label">选曲风</div>
-            </div>
-            <div class="hero-arrow">→</div>
-            <div class="hero-step">
-                <div class="hero-step-icon">🎧</div>
-                <div class="hero-step-label">听歌</div>
-            </div>
-        </div>
     </div>
-</div>
 
-<div class="container">
-    <div class="grid">
-
+    <div class="main-grid">
         <!-- 左栏 -->
         <div class="card">
             <div class="card-header">
-                <div class="card-header-icon purple">📸</div>
-                <div class="card-header-text">
+                <div class="card-icon purple">📸</div>
+                <div>
                     <h3>准备素材</h3>
                     <p>上传图片，AI 自动识别类型</p>
                 </div>
             </div>
             <div class="card-body">
-                <!-- 步骤 1 -->
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                    <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">1</span>
-                    <span style="font-size:12px;font-weight:600;color:var(--text);">上传图片</span>
-                </div>
-                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondrop="event.preventDefault();var f=event.dataTransfer.files[0];if(f){var r=new FileReader();r.onload=function(e){onImageReady(e.target.result)};r.readAsDataURL(f);}" ondragover="event.preventDefault()">
+                <div class="step-row"><span class="step-num">1</span><span class="step-label">上传图片</span></div>
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
                     <span class="upload-icon">🎵</span>
-                    <div class="upload-text" id="uploadText">点击、拖拽或 Ctrl/Cmd+V 粘贴图片</div>
-                    <div class="upload-hint">支持思维导图、流程图、思维笔记截图 • <span onclick="event.stopPropagation();navigator.clipboard.read().then(function(items){for(var i of items){for(var t of i.types){if(t.indexOf('image')===0){i.getType(t).then(function(b){var r=new FileReader();r.onload=function(e){onImageReady(e.target.result)};r.readAsDataURL(b);});return;}}}})" style="color:var(--primary);cursor:pointer;text-decoration:underline;">📋 粘贴图片</span></div>
+                    <div class="upload-text" id="uploadText">点击、拖拽或快捷键粘贴图片</div>
+                    <div class="upload-hint">支持思维导图、流程图、思维笔记截图 · <a href="javascript:void(0)" onclick="event.stopPropagation();handlePaste()">📋 粘贴图片</a></div>
                 </div>
-                <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="var f=this.files[0];if(f){var r=new FileReader();r.onload=function(e){onImageReady(e.target.result)};r.readAsDataURL(f);}">
+                <input type="file" id="fileInput" accept="image/*" style="display:none;">
 
                 <div class="preview-wrap" id="previewWrap" style="display:none;">
-                    <img id="previewImg" src="" alt="预览">
-                    <div class="preview-badge">已选择 <span onclick="clearUpload()" style="cursor:pointer;margin-left:6px;opacity:0.7;">✕ 清除</span></div>
+                    <img id="previewImg" src="" alt="">
+                    <div class="preview-badge">已选择<span class="preview-clear" onclick="resetAll()">✕ 清除</span></div>
+                    <a class="preview-link" id="viewLink" target="_blank" style="display:none;">📎 查看原图</a>
                 </div>
 
                 <div style="text-align:center;margin-top:10px;">
@@ -557,88 +156,48 @@ body {
                 </div>
 
                 <div style="margin-top:10px;" id="sampleSection">
-                    <span style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">直接试用</span>
+                    <div class="section-label">直接试用</div>
                     <div class="style-grid" style="margin-top:6px;">
-                        <div class="style-card sample-card-btn" onclick="loadSampleInline('mindmap')">
-                            <span class="style-emoji">📊</span>
-                            <span class="style-name">思维导图</span>
+                        <div class="style-card" onclick="loadSample('mindmap')">
+                            <span class="style-emoji">📊</span><span class="style-name">思维导图</span>
                         </div>
-                        <div class="style-card sample-card-btn" onclick="loadSampleInline('flowchart')">
-                            <span class="style-emoji">🔀</span>
-                            <span class="style-name">流程图</span>
+                        <div class="style-card" onclick="loadSample('flowchart')">
+                            <span class="style-emoji">🔀</span><span class="style-name">流程图</span>
                         </div>
-                        <div class="style-card sample-card-btn" onclick="loadSampleInline('notes')">
-                            <span class="style-emoji">📝</span>
-                            <span class="style-name">思维笔记</span>
+                        <div class="style-card" onclick="loadSample('notes')">
+                            <span class="style-emoji">📝</span><span class="style-name">思维笔记</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="divider"></div>
 
-                <!-- 步骤 2 -->
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                    <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">2</span>
-                    <span style="font-size:12px;font-weight:600;color:var(--text);">选择曲风</span>
-                </div>
+                <div class="step-row"><span class="step-num">2</span><span class="step-label">选择曲风</span></div>
                 <div class="style-grid">
-                    <div class="style-card" data-style="pop">
-                        <span class="style-emoji">🎤</span>
-                        <span class="style-name">流行</span>
-                    </div>
-                    <div class="style-card" data-style="ancient">
-                        <span class="style-emoji">🏮</span>
-                        <span class="style-name">古风</span>
-                    </div>
-                    <div class="style-card" data-style="folk">
-                        <span class="style-emoji">🎸</span>
-                        <span class="style-name">民谣</span>
-                    </div>
-                    <div class="style-card" data-style="electronic">
-                        <span class="style-emoji">🎹</span>
-                        <span class="style-name">电子</span>
-                    </div>
-                    <div class="style-card" data-style="rock">
-                        <span class="style-emoji">🤘</span>
-                        <span class="style-name">摇滚</span>
-                    </div>
-                    <div class="style-card" data-style="hiphop">
-                        <span class="style-emoji">🎧</span>
-                        <span class="style-name">嘻哈</span>
-                    </div>
-                    <div class="style-card" data-style="rnb">
-                        <span class="style-emoji">🎷</span>
-                        <span class="style-name">R&B</span>
-                    </div>
-                    <div class="style-card" data-style="jazz">
-                        <span class="style-emoji">🎼</span>
-                        <span class="style-name">爵士</span>
-                    </div>
-                    <div class="style-card" data-style="lofi">
-                        <span class="style-emoji">🍃</span>
-                        <span class="style-name">治愈</span>
-                    </div>
+                    <div class="style-card" data-style="pop" onclick="selectStyle(this)"><span class="style-emoji">🎤</span><span class="style-name">流行</span></div>
+                    <div class="style-card" data-style="ancient" onclick="selectStyle(this)"><span class="style-emoji">🏮</span><span class="style-name">古风</span></div>
+                    <div class="style-card" data-style="folk" onclick="selectStyle(this)"><span class="style-emoji">🎸</span><span class="style-name">民谣</span></div>
+                    <div class="style-card" data-style="electronic" onclick="selectStyle(this)"><span class="style-emoji">🎹</span><span class="style-name">电子</span></div>
+                    <div class="style-card" data-style="rock" onclick="selectStyle(this)"><span class="style-emoji">🤘</span><span class="style-name">摇滚</span></div>
+                    <div class="style-card" data-style="hiphop" onclick="selectStyle(this)"><span class="style-emoji">🎧</span><span class="style-name">嘻哈</span></div>
+                    <div class="style-card" data-style="rnb" onclick="selectStyle(this)"><span class="style-emoji">🎷</span><span class="style-name">R&B</span></div>
+                    <div class="style-card" data-style="jazz" onclick="selectStyle(this)"><span class="style-emoji">🎼</span><span class="style-name">爵士</span></div>
+                    <div class="style-card" data-style="lofi" onclick="selectStyle(this)"><span class="style-emoji">🍃</span><span class="style-name">治愈</span></div>
                 </div>
 
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;margin-top:16px;">
-                    <span style="width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">3</span>
-                    <span style="font-size:12px;font-weight:600;color:var(--text);">生成歌曲</span>
-                </div>
+                <div class="divider"></div>
+
+                <div class="step-row"><span class="step-num">3</span><span class="step-label">生成歌曲</span></div>
                 <div class="error-box" id="errorBox"></div>
-                <button class="btn btn-primary" id="generateBtn" onclick="startGenerate()" disabled>
-                    🎵 生成歌曲
-                </button>
+                <button class="btn btn-primary" id="generateBtn" onclick="startGenerate()" disabled>🎵 生成歌曲</button>
             </div>
         </div>
 
-        <!-- 中栏：歌词 -->
+        <!-- 中栏 -->
         <div class="card">
             <div class="card-header">
-                <div class="card-header-icon pink">📝</div>
-                <div class="card-header-text">
-                    <h3>歌词预览</h3>
-                    <p id="lyricsStatus">等待创作</p>
-                </div>
+                <div class="card-icon pink">📝</div>
+                <div><h3>歌词预览</h3><p id="lyricsStatus">等待创作</p></div>
             </div>
             <div class="card-body" id="lyricsPanel">
                 <div class="empty-state" id="lyricsEmpty">
@@ -646,7 +205,7 @@ body {
                     <div class="empty-title">等待创作</div>
                     <div class="empty-desc">上传图片并生成，AI 会根据内容创作歌词</div>
                 </div>
-                <div class="loading-state" id="lyricsLoading" style="display:none;">
+                <div id="lyricsLoading" style="display:none;">
                     <div class="loading-ring"></div>
                     <div class="loading-text">AI 正在创作歌词...</div>
                 </div>
@@ -654,14 +213,11 @@ body {
             </div>
         </div>
 
-        <!-- 右栏：播放 -->
+        <!-- 右栏 -->
         <div class="card">
             <div class="card-header">
-                <div class="card-header-icon cyan">🎧</div>
-                <div class="card-header-text">
-                    <h3>试听</h3>
-                    <p id="audioStatus">等待生成</p>
-                </div>
+                <div class="card-icon cyan">🎧</div>
+                <div><h3>试听</h3><p id="audioStatus">等待生成</p></div>
             </div>
             <div class="card-body" id="audioPanel">
                 <div class="empty-state" id="audioEmpty">
@@ -669,192 +225,149 @@ body {
                     <div class="empty-title">等待生成</div>
                     <div class="empty-desc">歌曲生成后会在这里播放</div>
                 </div>
-                <div class="loading-state" id="audioLoading" style="display:none;">
+                <div id="audioLoading" style="display:none;">
                     <div class="loading-ring"></div>
                     <div class="loading-text">AI 正在谱曲...</div>
-                    <div class="loading-sub">大约 20-30 秒</div>
+                    <div style="font-size:11px;color:var(--text-muted);text-align:center;">大约 20-30 秒</div>
                 </div>
-                <div id="audioResult" style="display:none;">
-                    <div class="album-art" id="albumArt">
-                        <div class="album-art-inner">🎵</div>
-                    </div>
-                    <div class="song-title-display" id="songTitleEl">AI 原创歌曲</div>
-                    <div class="song-summary-display" id="songSummary"></div>
-                    <div class="visualizer" id="visualizerEl">
-                        <div class="visualizer-bar"></div><div class="visualizer-bar"></div><div class="visualizer-bar"></div>
-                        <div class="visualizer-bar"></div><div class="visualizer-bar"></div><div class="visualizer-bar"></div>
-                        <div class="visualizer-bar"></div><div class="visualizer-bar"></div><div class="visualizer-bar"></div>
-                        <div class="visualizer-bar"></div><div class="visualizer-bar"></div><div class="visualizer-bar"></div>
-                    </div>
-                    <div class="stats-row">
-                        <div class="stat-item">
-                            <div class="stat-num" id="songDuration">--</div>
-                            <div class="stat-label">时长</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-num">MP3</div>
-                            <div class="stat-label">格式</div>
-                        </div>
-                    </div>
-                    <div class="audio-player-wrap">
-                        <audio id="audioPlayer" controls onplay="toggleVisualizer(true)" onpause="toggleVisualizer(false)"></audio>
-                    </div>
-                    <button class="btn btn-ghost" onclick="downloadSong()">⬇ 下载歌曲</button>
+                <div class="audio-player" id="audioPlayer" style="display:none;">
+                    <audio id="audioEl" controls></audio>
+                    <div class="download-link" onclick="downloadSong()">📥 下载歌曲</div>
                 </div>
             </div>
         </div>
+    </div>
 
+    <div class="footer">上传图片，AI 为你创作专属音乐</div>
+</div>
+
+<div class="modal-overlay" id="validateModal">
+    <div class="modal-box">
+        <div class="modal-icon">🤔</div>
+        <div class="modal-title">图片看起来不是图表类内容</div>
+        <div class="modal-desc" id="validateMsg">建议上传思维导图、流程图或思维笔记截图，识别效果最佳。</div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" onclick="forceGenerate()">🎵 仍然生成</button>
+            <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+            <div style="display:flex;gap:6px;margin-top:6px;">
+                <div class="style-card" onclick="loadSample('mindmap')" style="flex:1;"><span class="style-emoji">📊</span><span class="style-name">思维导图样例</span></div>
+                <div class="style-card" onclick="loadSample('flowchart')" style="flex:1;"><span class="style-emoji">🔀</span><span class="style-name">流程图样例</span></div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">没有图？去 <a href="https://www.processon.com" target="_blank" style="color:#A78BFA;">ProcessOn</a> 免费在线作图</div>
+        </div>
     </div>
 </div>
 
-<div class="footer">上传图片，AI 为你创作专属音乐</div>
-
 <script>
-window.onerror=function(m,u,l){document.getElementById('errorBox').textContent='JS ERR:'+m+' line:'+l;document.getElementById('errorBox').classList.add('show');return false;}
-// 图片加载后统一处理
-function onImageReady(dataUrl){
+// ===== 状态 =====
+var imageDataUrl = null;
+var selectedImgType = '图表';
+var selectedMusicStyle = '';
+var currentMp3Url = null;
+var forceMode = false;
+
+// ===== 样例数据 =====
+var SAMPLE_FILES = {mindmap:'/static/sample_mindmap.svg',flowchart:'/static/sample_flowchart.svg',notes:'/static/sample_notes.png'};
+var SAMPLE_VIEWS = {mindmap:'https://www.processon.com/view/695b920c4e3bc00c5538c3ab',flowchart:'https://www.processon.com/view/69d761ce50f07d20c7ecb978',notes:'https://www.processon.com/view/62f1fcc5f346fb49413cbb96'};
+
+function selectStyle(el) {
+    var all = document.querySelectorAll('.style-card');
+    for (var i = 0; i < all.length; i++) all[i].classList.remove('selected');
+    el.classList.add('selected');
+    selectedMusicStyle = el.dataset.style;
+}
+
+// ===== 上传 =====
+var fileInput = document.getElementById('fileInput');
+fileInput.addEventListener('change', function() {
+    var f = this.files[0];
+    if (f) readAndShow(f);
+});
+
+var uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); });
+uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    if (e.dataTransfer.files[0]) readAndShow(e.dataTransfer.files[0]);
+});
+
+document.addEventListener('paste', function(e) {
+    var items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (var i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') === 0) {
+            e.preventDefault();
+            readAndShow(items[i].getAsFile());
+            return;
+        }
+    }
+});
+
+function handlePaste() {
+    navigator.clipboard.read().then(function(items) {
+        for (var i = 0; i < items.length; i++) {
+            for (var j = 0; j < items[i].types.length; j++) {
+                if (items[i].types[j].indexOf('image') === 0) {
+                    items[i].getType(items[i].types[j]).then(function(blob) { readAndShow(blob); });
+                    return;
+                }
+            }
+        }
+        alert('剪贴板中没有图片');
+    }).catch(function() { alert('请使用 Ctrl+V (Mac: Cmd+V) 直接粘贴图片'); });
+}
+
+function readAndShow(file) {
+    if (file.type && file.type.indexOf('image') !== 0) { showError('请上传图片文件'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        imageDataUrl = e.target.result;
+        showPreview(imageDataUrl, null);
+    };
+    reader.readAsDataURL(file);
+}
+
+function showPreview(dataUrl, viewUrl) {
     document.getElementById('previewImg').src = dataUrl;
     document.getElementById('previewWrap').style.display = 'block';
     document.getElementById('generateBtn').disabled = false;
-    document.getElementById('sampleSection').style.opacity = '0.3';
-    document.getElementById('sampleSection').style.pointerEvents = 'none';
-    // 校验图片类型
-    fetch(dataUrl).then(function(r){return r.blob()}).then(function(b){
-        var fd = new FormData(); fd.append('image', b, 'upload.png');
-        fetch('/api/validate', {method:'POST', body:fd}).then(function(r){return r.json()}).then(function(d){
-            if(!d.valid){
-                document.getElementById('validateMsg').textContent = '图片识别为非思维导图/流程图/思维笔记，生成效果可能不理想';
-                document.getElementById('validateModal').style.display = 'flex';
-                document.getElementById('generateBtn').disabled = true;
-                pendingBlob = b;
-            }
-        }).catch(function(){});
-    });
+
+    var link = document.getElementById('viewLink');
+    if (viewUrl) { link.href = viewUrl; link.style.display = 'block'; }
+    else link.style.display = 'none';
+
+    if (!viewUrl) document.getElementById('sampleSection').classList.add('muted');
 }
-function clearUpload(){
+
+function resetAll() {
+    imageDataUrl = null;
     document.getElementById('previewImg').src = '';
     document.getElementById('previewWrap').style.display = 'none';
     document.getElementById('generateBtn').disabled = true;
-    document.getElementById('sampleSection').style.opacity = '1';
-    document.getElementById('sampleSection').style.pointerEvents = 'auto';
-    document.getElementById('fileInput').value = '';
+    document.getElementById('sampleSection').classList.remove('muted');
+    document.getElementById('viewLink').style.display = 'none';
+    fileInput.value = '';
+    forceMode = false;
 }
-var pendingBlob = null;
-// 样例数据
-var SAMPLES={mindmap:'/static/sample_mindmap.svg',flowchart:'/static/sample_flowchart.svg',notes:'/static/sample_notes.png'};
-var SAMPLE_VIEWS={mindmap:'https://www.processon.com/view/695b920c4e3bc00c5538c3ab',flowchart:'https://www.processon.com/view/69d761ce50f07d20c7ecb978',notes:'https://www.processon.com/view/62f1fcc5f346fb49413cbb96'};
-function loadSampleInline(type){
-    fetch(SAMPLES[type]).then(function(r){return r.blob()}).then(function(b){
-        var reader=new FileReader();
-        reader.onload=function(e){
-            document.getElementById('previewImg').src=e.target.result;
-            document.getElementById('previewWrap').style.display='block';
-            document.getElementById('generateBtn').disabled=false;
-            document.getElementById('sampleSection').style.opacity='1';
-            document.getElementById('sampleSection').style.pointerEvents='auto';
-            var o=document.getElementById('viewLink');if(o)o.remove();
-            var d=document.createElement('div');d.id='viewLink';
-            d.style='position:absolute;bottom:8px;left:8px;font-size:10px;background:rgba(0,0,0,0.6);color:white;padding:2px 8px;border-radius:4px;';
-            d.innerHTML='<a href=\"'+SAMPLE_VIEWS[type]+'\" target=\"_blank\" style=\"color:white;text-decoration:none;\">📎 查看原图</a>';
-            document.getElementById('previewWrap').appendChild(d);
+
+// ===== 样例 =====
+function loadSample(type) {
+    fetch(SAMPLE_FILES[type]).then(function(r) { return r.blob(); }).then(function(b) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            showPreview(e.target.result, SAMPLE_VIEWS[type]);
+            document.getElementById('sampleSection').classList.remove('muted');
+            document.getElementById('uploadText').textContent = '已加载：' + ({mindmap:'思维导图',flowchart:'流程图',notes:'思维笔记'})[type] + '样例';
+            document.getElementById('uploadText').style.color = '#10B981';
+            document.getElementById('uploadZone').classList.add('active');
+            document.getElementById('validateModal').style.display = 'none';
+            forceMode = true;
         };
         reader.readAsDataURL(b);
     });
 }
-let imageBase64 = null;
-let selectedImgType = '图表';
-let selectedMusicStyle = '';
-let currentMp3Url = null;
 
-// 曲风选择
-document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(card => {
-    card.addEventListener('click', function() {
-        document.querySelectorAll('.style-card:not(.sample-card-btn)').forEach(c => c.classList.remove('selected'));
-        this.classList.add('selected');
-        selectedMusicStyle = this.dataset.style;
-    });
-});
-
-// 上传
-const uploadZone = document.getElementById('uploadZone');
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-
-function showError(msg) {
-    const el = document.getElementById('errorBox');
-    el.textContent = '⚠ ' + msg;
-    el.classList.add('show');
-}
-function hideError() { document.getElementById('errorBox').classList.remove('show'); }
-
-// 歌词渲染
-function renderLyrics(text) {
-    const container = document.getElementById('lyricsContent');
-    container.innerHTML = '';
-    const blocks = [];
-    const lines = text.split('\n');
-    let curLabel = 'Verse', curLines = [];
-    for (const line of lines) {
-        const m = line.match(/^\s*\[(Verse|Chorus|Bridge|Intro|Outro|Hook|Solo)[^\]]*\]/i);
-        if (m) {
-            if (curLines.length) blocks.push({ label: curLabel, text: curLines.join('\n') });
-            curLabel = m[1]; curLabel = curLabel.charAt(0).toUpperCase() + curLabel.slice(1).toLowerCase();
-            curLines = [line.trim()];
-        } else if (line.trim()) {
-            curLines.push(line.trim());
-        }
-    }
-    if (curLines.length) blocks.push({ label: curLabel, text: curLines.join('\n') });
-    blocks.forEach(b => {
-        const div = document.createElement('div');
-        const lc = b.label.toLowerCase();
-        div.className = 'lyric-block ' + (lc === 'chorus' ? 'chorus' : lc === 'bridge' ? 'bridge' : 'verse');
-        div.innerHTML = '<div class="lyric-label">' + b.label + '</div><div class="lyric-text">' + b.text + '</div>';
-        container.appendChild(div);
-    });
-}
-
-function toggleVisualizer(playing) {
-    document.getElementById('albumArt').classList.toggle('playing', playing);
-}
-
-// 生成
-// 验证图片是否为图表类型
-let forceMode = false;
-
-async function startGenerate() {
-    if (!imageBase64) { showError('请先上传图片'); return; }
-    hideError();
-
-    if (!forceMode) {
-        const btn = document.getElementById('generateBtn');
-        btn.disabled = true;
-        btn.textContent = '🔍 检测图片类型...';
-
-        const formData = new FormData();
-        const blob = await (await fetch(imageBase64)).blob();
-        formData.append('image', blob, 'upload.png');
-
-        try {
-            const resp = await fetch('/api/validate', { method: 'POST', body: formData });
-            const data = await resp.json();
-
-            if (!data.valid) {
-                pendingBlob = blob;
-                document.getElementById('validateModal').style.display = 'flex';
-                btn.disabled = false;
-                btn.textContent = '🎵 生成歌曲';
-                return;
-            }
-        } catch(e) {
-            // 校验挂了就跳过，直接生成
-        }
-        pendingBlob = blob;
-    }
-
-    doGenerate();
-}
-
+// ===== 校验 =====
 function closeModal() {
     document.getElementById('validateModal').style.display = 'none';
     document.getElementById('generateBtn').disabled = false;
@@ -867,141 +380,130 @@ function forceGenerate() {
     forceMode = true;
 }
 
+// ===== 错误 =====
+function showError(msg) {
+    var el = document.getElementById('errorBox');
+    el.textContent = '\u26a0 ' + msg;
+    el.classList.add('show');
+}
+function hideError() { document.getElementById('errorBox').classList.remove('show'); }
+
+// ===== 生成 =====
+function startGenerate() {
+    if (!imageDataUrl) { showError('请先上传图片或选择样例'); return; }
+    if (!selectedMusicStyle) { showError('请选择一种曲风'); return; }
+    hideError();
+
+    if (!forceMode) {
+        validateThenGenerate();
+        return;
+    }
+    doGenerate();
+}
+
+async function validateThenGenerate() {
+    var resp = await fetch(imageDataUrl);
+    var blob = await resp.blob();
+    var fd = new FormData();
+    fd.append('image', blob, 'upload.png');
+    var r = await fetch('/api/validate', {method:'POST', body:fd});
+    var d = await r.json();
+    if (!d.valid) {
+        document.getElementById('validateMsg').textContent = d.reason || '建议上传思维导图、流程图或思维笔记截图';
+        document.getElementById('validateModal').style.display = 'flex';
+        return;
+    }
+    doGenerate();
+}
+
 async function doGenerate() {
-    const btn = document.getElementById('generateBtn');
-    btn.disabled = true;
-    btn.textContent = '⏳ AI 分析中...';
-
     document.getElementById('lyricsEmpty').style.display = 'none';
-    document.getElementById('lyricsLoading').style.display = 'flex';
+    document.getElementById('lyricsLoading').style.display = 'block';
     document.getElementById('lyricsContent').style.display = 'none';
-    document.getElementById('lyricsStatus').textContent = 'AI 识别中...';
+    document.getElementById('lyricsStatus').textContent = '生成中...';
     document.getElementById('audioEmpty').style.display = 'none';
-    document.getElementById('audioLoading').style.display = 'flex';
-    document.getElementById('audioResult').style.display = 'none';
+    document.getElementById('audioLoading').style.display = 'block';
+    document.getElementById('audioPlayer').style.display = 'none';
     document.getElementById('audioStatus').textContent = '生成中...';
-
-    const formData = new FormData();
-    const blob = pendingBlob || await (await fetch(imageBase64)).blob();
-    pendingBlob = null;
-    formData.append('image', blob, 'upload.png');
-    formData.append('img_type', selectedImgType);
-    formData.append('music_style', selectedMusicStyle);
+    document.getElementById('generateBtn').disabled = true;
+    document.getElementById('generateBtn').textContent = '\u23F3 生成中...';
+    forceMode = false;
 
     try {
-        const resp = await fetch('/api/song', { method: 'POST', body: formData });
-        const text = await resp.text();
-        let data;
-        try { data = JSON.parse(text); } catch(e) { throw new Error('服务响应异常，请重试'); }
-        if (!resp.ok) throw new Error(data.error || '请求失败');
+        var resp = await fetch(imageDataUrl);
+        var blob = await resp.blob();
+        var fd = new FormData();
+        fd.append('image', blob, 'image.png');
+        fd.append('img_type', selectedImgType);
+        fd.append('music_style', selectedMusicStyle);
+        var r = await fetch('/api/generate', {method:'POST', body:fd});
+        var d = await r.json();
 
+        if (d.error) {
+            showError(d.error);
+            resetGenerateBtn();
+            document.getElementById('lyricsLoading').style.display = 'none';
+            document.getElementById('lyricsEmpty').style.display = 'block';
+            document.getElementById('lyricsStatus').textContent = '生成失败';
+            document.getElementById('audioLoading').style.display = 'none';
+            document.getElementById('audioEmpty').style.display = 'block';
+            document.getElementById('audioStatus').textContent = '生成失败';
+            return;
+        }
+
+        renderLyrics(d.lyrics);
         document.getElementById('lyricsLoading').style.display = 'none';
         document.getElementById('lyricsContent').style.display = 'block';
-        document.getElementById('lyricsStatus').textContent = data.title || 'AI 原创';
-        renderLyrics(data.lyrics);
+        document.getElementById('lyricsStatus').textContent = '创作完成';
 
         document.getElementById('audioLoading').style.display = 'none';
-        document.getElementById('audioResult').style.display = 'block';
-        document.getElementById('audioStatus').textContent = '就绪';
-        document.getElementById('songTitleEl').textContent = data.title || 'AI 原创歌曲';
-        document.getElementById('songSummary').textContent = data.summary || '';
-        document.getElementById('songDuration').textContent = formatDuration(data.duration || 0);
-
-        currentMp3Url = data.mp3_url;
-        const audio = document.getElementById('audioPlayer');
-        audio.src = data.mp3_url;
-        audio.load();
-
-        btn.textContent = '🎵 再来一首';
-        btn.disabled = false;
-
-    } catch (err) {
-        document.getElementById('lyricsLoading').style.display = 'none';
-        document.getElementById('lyricsEmpty').style.display = 'flex';
-        document.getElementById('lyricsStatus').textContent = '等待创作';
-        document.getElementById('audioLoading').style.display = 'none';
-        document.getElementById('audioEmpty').style.display = 'flex';
-        document.getElementById('audioStatus').textContent = '等待生成';
-        showError(err.message);
-        btn.disabled = false;
-        btn.textContent = '🎵 生成歌曲';
+        document.getElementById('audioPlayer').style.display = 'block';
+        document.getElementById('audioEl').src = d.mp3_url;
+        currentMp3Url = d.mp3_url;
+        document.getElementById('audioStatus').textContent = '歌曲就绪';
+        resetGenerateBtn();
+    } catch(err) {
+        showError('网络错误：' + err.message);
+        resetGenerateBtn();
     }
 }
 
-function formatDuration(s) {
-    if (!s) return '--:--';
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return m + ':' + String(sec).padStart(2, '0');
+function resetGenerateBtn() {
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('generateBtn').textContent = '\uD83C\uDFB5 生成歌曲';
+}
+
+function renderLyrics(text) {
+    var c = document.getElementById('lyricsContent');
+    c.innerHTML = '';
+    var lines = text.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line) continue;
+        if (line.indexOf('\u3010') === 0) {
+            var l = document.createElement('div');
+            l.className = 'lyrics-label';
+            l.textContent = line;
+            c.appendChild(l);
+        } else {
+            var d = document.createElement('div');
+            d.className = 'lyrics-line';
+            d.textContent = line;
+            c.appendChild(d);
+        }
+    }
 }
 
 function downloadSong() {
     if (currentMp3Url) window.open('/api/song/download?url=' + encodeURIComponent(currentMp3Url), '_blank');
 }
 
-// ====== 健康检查 ======
-fetch('/api/health').then(r => r.json()).then(d => {
-        document.getElementById('previewImg').src = imageBase64;
-        document.getElementById('previewWrap').style.display = 'block';
-        document.getElementById('generateBtn').disabled = false;
-        // 更新上传框提示
-        const names = {mindmap:'思维导图', flowchart:'流程图', notes:'思维笔记'};
-        document.getElementById('uploadText').textContent = '已加载：' + (names[type] || '') + '样例';
-        document.getElementById('uploadText').style.color = '#10B981';
-        // 二选一：保持直接试用可用
-        document.getElementById('sampleSection').style.opacity = '1';
-        document.getElementById('sampleSection').style.pointerEvents = 'auto';
-        document.getElementById('fileInput').value = '';
-        // 清除旧的查看原图链接
-        const oldLink = document.getElementById('viewLink');
-        if (oldLink) oldLink.remove();
-        document.getElementById('previewWrap').insertAdjacentHTML('beforeend',
-            `<div id="viewLink" style="position:absolute;bottom:8px;left:8px;font-size:10px;background:rgba(0,0,0,0.6);color:white;padding:2px 8px;border-radius:4px;">
-                <a href="${sample.view}" target="_blank" style="color:white;text-decoration:none;" onclick="event.stopPropagation()">📎 查看原图</a>
-            </div>`);
-
-        if (sample.imgType) selectedImgType = sample.imgType;
-        // 加载样例时自动选流行曲风
-        if (!selectedMusicStyle) {
-            selectedMusicStyle = 'pop';
-            document.querySelector('.style-card[data-style="pop"]')?.classList.add('selected');
-        }
-        document.getElementById('validateModal').style.display = 'none';
-        forceMode = true;
-    };
-    reader.readAsDataURL(blob);
-
-fetch('/api/health').then(r => r.json()).then(d => {
+fetch('/api/health').then(function(r) { return r.json(); }).then(function(d) {
     if (!d.minimax_configured || !d.zhipu_configured) {
         document.getElementById('generateBtn').disabled = true;
-        document.getElementById('generateBtn').textContent = '⚠ 服务未配置';
+        document.getElementById('generateBtn').textContent = '\u26A0 服务未配置';
     }
 });
 </script>
-<!-- 图片类型提示弹窗 -->
-<div class="modal-overlay" id="validateModal" style="display:none;">
-    <div class="modal-box">
-        <div class="modal-icon">🤔</div>
-        <div class="modal-title">图片看起来不是图表类内容</div>
-        <div class="modal-desc" id="validateMsg">建议上传思维导图、流程图或思维笔记截图，识别效果最佳。</div>
-        <div class="modal-actions">
-            <button class="btn btn-primary" onclick="forceGenerate()" style="margin-top:0;">🎵 仍然生成</button>
-            <button class="btn btn-ghost" onclick="closeModal()">取消</button>
-            <div class="sample-grid">
-                <div class="sample-card" onclick="loadSampleInline('mindmap')">
-                    <span class="sample-card-icon">📊</span>
-                    <span class="sample-card-label">思维导图样例</span>
-                </div>
-                <div class="sample-card" onclick="loadSampleInline('flowchart')">
-                    <span class="sample-card-icon">🔀</span>
-                    <span class="sample-card-label">流程图样例</span>
-                </div>
-            </div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">
-                没有图？去 <a href="https://www.processon.com" target="_blank" style="color:#A78BFA;">ProcessOn</a> 免费在线作图
-            </div>
-        </div>
-    </div>
-</div>
 </body>
 </html>
