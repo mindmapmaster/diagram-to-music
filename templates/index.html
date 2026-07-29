@@ -372,7 +372,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                         <div class="share-label">分享链接</div>
                         <div class="share-row">
                             <input type="text" id="shareInput" readonly>
-                            <button onclick="copyShareUrl()">复制</button>
+                            <button onclick="copyShareUrl(this)">复制</button>
                         </div>
                     </div>
                 </div>
@@ -756,16 +756,27 @@ function handleDownload() {
     return false;
 }
 
-function copyShareUrl() {
+function copyShareUrl(btn) {
     var input = document.getElementById('shareInput');
-    input.select();
-    input.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(input.value).then(function() {
-        var btn = event.target;
+    var url = input.value;
+    var done = function() {
         var original = btn.textContent;
         btn.textContent = '已复制';
         setTimeout(function() { btn.textContent = original; }, 1500);
-    });
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done).catch(function() {
+            execCopy(input, done);
+        });
+    } else {
+        execCopy(input, done);
+    }
+}
+function execCopy(input, done) {
+    input.select();
+    input.setSelectionRange(0, 99999);
+    try { document.execCommand('copy'); } catch(e) {}
+    done();
 }
 
 function loadCases() {
