@@ -622,7 +622,26 @@ async function doGenerate() {
         fd.append('img_type', selectedImgType);
         fd.append('music_style', selectedMusicStyle);
         var r = await fetch('/api/song', {method:'POST', body:fd});
-        var d = await r.json();
+        var text = await r.text();
+        if (!text) {
+            showError('服务器响应为空，可能是内存不足或请求超时，请稍后重试');
+            resetGenerateBtn();
+            document.getElementById('lyricsLoading').style.display = 'none';
+            document.getElementById('lyricsEmpty').style.display = 'block';
+            document.getElementById('audioLoading').style.display = 'none';
+            document.getElementById('audioEmpty').style.display = 'block';
+            return;
+        }
+        var d;
+        try { d = JSON.parse(text); } catch(e) {
+            showError('服务器返回异常（HTTP ' + r.status + '），请稍后重试');
+            resetGenerateBtn();
+            document.getElementById('lyricsLoading').style.display = 'none';
+            document.getElementById('lyricsEmpty').style.display = 'block';
+            document.getElementById('audioLoading').style.display = 'none';
+            document.getElementById('audioEmpty').style.display = 'block';
+            return;
+        }
 
         if (d.error) {
             showError(d.error);
