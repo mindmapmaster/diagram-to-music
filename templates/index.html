@@ -17,7 +17,8 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 .container { max-width:1200px; margin:0 auto; }
 
 /* Hero */
-.hero { text-align:center; padding:32px 0 20px; }
+.hero { text-align:center; padding:48px 0 32px; position:relative; }
+.hero::before { content:''; position:absolute; top:-60px; left:50%; transform:translateX(-50%); width:600px; height:300px; background:radial-gradient(ellipse,rgba(108,92,231,0.12),transparent 70%); pointer-events:none; }
 .hero-badge { display:inline-block; background:rgba(108,92,231,0.15); color:#A78BFA; padding:4px 14px; border-radius:20px; font-size:11px; font-weight:600; letter-spacing:0.1em; margin-bottom:12px; }
 .hero-title { font-size:28px; font-weight:800; margin-bottom:6px; }
 .hero-desc { color:var(--text-muted); font-size:14px; }
@@ -137,7 +138,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                 </div>
             </div>
             <div class="card-body">
-                <div class="step-row"><span class="step-num">1</span><span class="step-label">上传图片</span></div>
+                <div class="step-row"><span class="step-num">1</span><span class="step-label">上传图片</span><a href="https://www.processon.com?utm_source=diagram2music" target="_blank" style="margin-left:auto;font-size:10px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);white-space:nowrap;">📎 没有图？去 ProcessOn 作图 →</a></div>
                 <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
                     <span class="upload-icon">🎵</span>
                     <div class="upload-text" id="uploadText">点击、拖拽或快捷键粘贴图片</div>
@@ -149,10 +150,6 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                     <img id="previewImg" src="" alt="">
                     <div class="preview-badge">已选择<span class="preview-clear" onclick="resetAll()">✕ 清除</span></div>
                     <a class="preview-link" id="viewLink" target="_blank" style="display:none;">📎 查看原图</a>
-                </div>
-
-                <div style="text-align:center;margin-top:10px;">
-                    <a href="https://www.processon.com" target="_blank" style="font-size:11px;color:var(--text-muted);text-decoration:none;border-bottom:1px dashed var(--text-muted);">📎 没有图？点击去 ProcessOn 免费在线作图 →</a>
                 </div>
 
                 <div style="margin-top:10px;" id="sampleSection">
@@ -253,7 +250,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                 <div class="style-card" onclick="loadSample('mindmap')" style="flex:1;"><span class="style-emoji">📊</span><span class="style-name">思维导图样例</span></div>
                 <div class="style-card" onclick="loadSample('flowchart')" style="flex:1;"><span class="style-emoji">🔀</span><span class="style-name">流程图样例</span></div>
             </div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">没有图？去 <a href="https://www.processon.com" target="_blank" style="color:#A78BFA;">ProcessOn</a> 免费在线作图</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">没有图？去 <a href="https://www.processon.com?utm_source=diagram2music" target="_blank" style="color:#A78BFA;">ProcessOn</a> 免费在线作图</div>
         </div>
     </div>
 </div>
@@ -268,7 +265,7 @@ var forceMode = false;
 
 // ===== 样例数据 =====
 var SAMPLE_FILES = {mindmap:'/static/sample_mindmap.svg',flowchart:'/static/sample_flowchart.svg',notes:'/static/sample_notes.png'};
-var SAMPLE_VIEWS = {mindmap:'https://www.processon.com/view/695b920c4e3bc00c5538c3ab',flowchart:'https://www.processon.com/view/69d761ce50f07d20c7ecb978',notes:'https://www.processon.com/view/62f1fcc5f346fb49413cbb96'};
+var SAMPLE_VIEWS = {mindmap:'https://www.processon.com/view/695b920c4e3bc00c5538c3ab?utm_source=diagram2music',flowchart:'https://www.processon.com/view/69d761ce50f07d20c7ecb978?utm_source=diagram2music',notes:'https://www.processon.com/view/62f1fcc5f346fb49413cbb96?utm_source=diagram2music'};
 
 function selectStyle(el) {
     var all = document.querySelectorAll('.style-card');
