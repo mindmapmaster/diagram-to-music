@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if not_found %}未找到{% else %}{{ title }}{% endif %} - 图生成歌曲</title>
+<style>
+:root {
+    --bg: #0D0D12; --surface: #14141A; --card-bg: #1A1A22; --card-border: #24242D;
+    --text: #E8E8ED; --text-secondary: #9CA3AF; --text-muted: #6B7280;
+    --primary: #6C5CE7; --primary-hover: #7C6CF7; --accent: #FF6B9D;
+    --success: #10B981;
+    --radius: 12px; --radius-xs: 8px; --transition: all 0.2s ease;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; min-height:100vh; }
+.container { max-width:720px; margin:0 auto; padding:20px; }
+
+/* Header */
+.header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.logo { font-size:16px; font-weight:700; color:var(--text); text-decoration:none; display:flex; align-items:center; gap:8px; }
+.logo:hover { color:var(--primary); }
+.badge { background:rgba(108,92,231,0.15); color:#A78BFA; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; }
+
+/* Card */
+.card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius); overflow:hidden; margin-bottom:16px; }
+.card-body { padding:20px; }
+
+/* Not found */
+.not-found { text-align:center; padding:60px 20px; }
+.not-found-icon { font-size:48px; margin-bottom:12px; }
+.not-found-title { font-size:18px; font-weight:700; margin-bottom:8px; }
+.not-found-desc { font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+
+/* Song header */
+.song-header { display:flex; gap:16px; align-items:flex-start; margin-bottom:16px; }
+.song-cover { width:120px; height:120px; border-radius:var(--radius); background:linear-gradient(135deg,#FF6B9D 0%,#6C5CE7 50%,#00D2FF 100%); flex-shrink:0; overflow:hidden; position:relative; }
+.song-cover img { width:100%; height:100%; object-fit:cover; }
+.song-info { flex:1; min-width:0; }
+.song-title { font-size:22px; font-weight:700; margin-bottom:6px; }
+.song-tag { display:inline-block; background:rgba(108,92,231,0.15); color:#A78BFA; font-size:12px; padding:3px 12px; border-radius:10px; margin-bottom:10px; }
+.song-date { font-size:12px; color:var(--text-muted); }
+
+/* Player */
+.audio-player { margin:16px 0; }
+.audio-player audio { width:100%; border-radius:8px; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; }
+.btn { flex:1; min-width:120px; padding:12px; border:none; border-radius:var(--radius-xs); font-size:14px; font-weight:600; cursor:pointer; transition:var(--transition); text-align:center; text-decoration:none; }
+.btn-primary { background:var(--primary); color:white; }
+.btn-primary:hover { background:var(--primary-hover); }
+.btn-ghost { background:transparent; color:var(--text-muted); border:1px solid var(--card-border); }
+.btn-ghost:hover { border-color:var(--primary); color:var(--text); }
+
+/* Share */
+.share-box { background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:var(--radius-xs); padding:12px; margin-top:16px; }
+.share-label { font-size:11px; color:var(--text-muted); margin-bottom:6px; }
+.share-url { display:flex; gap:8px; }
+.share-url input { flex:1; background:var(--surface); border:1px solid var(--card-border); color:var(--text); padding:8px 10px; border-radius:6px; font-size:12px; outline:none; }
+.share-url button { background:var(--primary); color:white; border:none; padding:8px 14px; border-radius:6px; font-size:12px; cursor:pointer; }
+
+/* Lyrics */
+.lyrics-title { font-size:14px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.lyrics-section { margin-bottom:16px; }
+.lyrics-section-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.lyrics-section-tag { background:linear-gradient(135deg, #6C5CE7, #A78BFA); color:#fff; font-size:10px; font-weight:700; padding:3px 9px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px; }
+.lyrics-section-marker { color:#A78BFA; font-size:12px; font-weight:600; }
+.lyrics-line { padding:3px 0; font-size:14px; line-height:1.8; color:var(--text-secondary); }
+.lyrics-label { color:#A78BFA; font-weight:700; margin-top:12px; margin-bottom:4px; font-size:13px; }
+.lyrics-empty { text-align:center; color:var(--text-muted); font-size:13px; padding:30px 0; }
+
+/* Mobile */
+@media (max-width:640px) {
+    .container { padding:12px; }
+    .song-header { flex-direction:column; }
+    .song-cover { width:100%; height:auto; aspect-ratio:1; }
+    .song-title { font-size:18px; }
+    .btn { width:100%; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <a href="/" class="logo">🎵 图生成歌曲</a>
+        <span class="badge">AI 为你写歌</span>
+    </div>
+
+    {% if not_found %}
+    <div class="card">
+        <div class="card-body">
+            <div class="not-found">
+                <div class="not-found-icon">😕</div>
+                <div class="not-found-title">歌曲不存在或已过期</div>
+                <div class="not-found-desc">该链接对应的歌曲结果未找到，可能已被删除或链接有误。</div>
+                <a href="/" class="btn btn-primary" style="display:inline-block; width:auto; min-width:160px;">返回首页生成</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body">
+            <div class="song-header">
+                <div class="song-cover">
+                    <img src="/api/image/{{ song_id }}" alt="{{ title }}">
+                </div>
+                <div class="song-info">
+                    <div class="song-title">{{ title }}</div>
+                    <div class="song-tag">{{ style_name }}</div>
+                    <div class="song-date">生成于 {{ created_at[:10] if created_at else '-' }}</div>
+                </div>
+            </div>
+
+            <div class="audio-player">
+                <audio controls src="/api/audio/{{ song_id }}"></audio>
+            </div>
+
+            <div class="actions">
+                <a class="btn btn-primary" href="/download/{{ song_id }}">📥 下载歌曲</a>
+                <a class="btn btn-ghost" href="/">🎵 我也生成一首</a>
+            </div>
+
+            <div class="share-box">
+                <div class="share-label">分享链接</div>
+                <div class="share-url">
+                    <input type="text" id="shareUrl" value="{{ request.url }}" readonly>
+                    <button onclick="copyUrl()">复制</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="lyrics-title">📝 歌词</div>
+            <div id="lyricsContent"></div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function copyUrl() {
+    var input = document.getElementById('shareUrl');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value).then(function() {
+        var btn = event.target;
+        var original = btn.textContent;
+        btn.textContent = '已复制';
+        setTimeout(function() { btn.textContent = original; }, 1500);
+    });
+}
+
+function renderLyrics(text) {
+    var c = document.getElementById('lyricsContent');
+    c.innerHTML = '';
+    if (!text || !text.trim()) {
+        var empty = document.createElement('div');
+        empty.className = 'lyrics-empty';
+        empty.textContent = '未获取到歌词内容';
+        c.appendChild(empty);
+        return;
+    }
+    var lines = text.split('\n');
+    var sectionDiv = null;
+    var foundSection = false;
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line) continue;
+        var sectionMatch = line.match(/^\[(verse|chorus|bridge|outro|intro|pre-chorus|hook)\s*(\d*)\]/i);
+        if (sectionMatch) {
+            foundSection = true;
+            var sectionName = sectionMatch[1].toUpperCase();
+            var sectionNum = sectionMatch[2] ? ' ' + sectionMatch[2] : '';
+            var header = document.createElement('div');
+            header.className = 'lyrics-section-header';
+            var tag = document.createElement('span');
+            tag.className = 'lyrics-section-tag';
+            tag.textContent = sectionName;
+            var marker = document.createElement('span');
+            marker.className = 'lyrics-section-marker';
+            marker.textContent = '[' + sectionMatch[1] + sectionNum + ']';
+            header.appendChild(tag);
+            header.appendChild(marker);
+            c.appendChild(header);
+            sectionDiv = document.createElement('div');
+            sectionDiv.className = 'lyrics-section';
+            c.appendChild(sectionDiv);
+        } else if (line.indexOf('【') === 0) {
+            foundSection = true;
+            var label = document.createElement('div');
+            label.className = 'lyrics-label';
+            label.textContent = line;
+            c.appendChild(label);
+            sectionDiv = document.createElement('div');
+            sectionDiv.className = 'lyrics-section';
+            c.appendChild(sectionDiv);
+        } else {
+            if (!foundSection) continue;
+            var d = document.createElement('div');
+            d.className = 'lyrics-line';
+            d.textContent = line;
+            if (sectionDiv) sectionDiv.appendChild(d);
+            else c.appendChild(d);
+        }
+    }
+}
+
+{% if not not_found %}
+renderLyrics({{ lyrics | tojson }});
+{% endif %}
+</script>
+</body>
+</html>

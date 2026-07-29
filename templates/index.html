@@ -135,6 +135,28 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 /* Sample Icons */
 .sample-icon-img { width:32px; height:32px; display:block; margin:0 auto 4px; }
 
+/* Cases */
+.cases-section { margin-top:16px; }
+.cases-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:12px; }
+.case-card { background:var(--surface); border:1px solid var(--card-border); border-radius:var(--radius-xs); overflow:hidden; cursor:pointer; transition:var(--transition); }
+.case-card:hover { border-color:var(--primary); transform:translateY(-2px); }
+.case-thumb { width:100%; aspect-ratio:16/10; object-fit:cover; display:block; background:var(--card-bg); }
+.case-info { padding:10px; }
+.case-title { font-size:13px; font-weight:700; margin-bottom:4px; }
+.case-meta { display:flex; align-items:center; justify-content:space-between; }
+.case-tag { background:rgba(108,92,231,0.12); color:#A78BFA; font-size:10px; padding:2px 8px; border-radius:8px; }
+.case-play { font-size:12px; color:var(--text-secondary); }
+.case-player { display:none; padding:12px; border-top:1px solid var(--card-border); background:rgba(0,0,0,0.2); }
+.case-player.show { display:block; }
+.case-player audio { width:100%; border-radius:6px; }
+
+/* Share */
+.share-box { background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:var(--radius-xs); padding:10px; margin-top:10px; }
+.share-label { font-size:11px; color:var(--text-muted); margin-bottom:6px; }
+.share-row { display:flex; gap:6px; }
+.share-row input { flex:1; background:var(--surface); border:1px solid var(--card-border); color:var(--text); padding:6px 8px; border-radius:6px; font-size:11px; outline:none; }
+.share-row button { background:var(--primary); color:white; border:none; padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer; }
+
 /* Song Result */
 .song-result { text-align:center; padding:8px 0; }
 .album-cover { width:100%; aspect-ratio:1; border-radius:16px; background:linear-gradient(135deg,#FF6B9D 0%,#6C5CE7 50%,#00D2FF 100%); position:relative; overflow:hidden; margin-bottom:16px; box-shadow:0 10px 40px rgba(108,92,231,0.25); }
@@ -187,6 +209,8 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
     .waveform-bar { width:3px; }
     .btn { padding:10px; font-size:13px; }
     .modal-box { margin:0 12px; padding:20px; }
+    .cases-grid { grid-template-columns:1fr 1fr; }
+    .case-title { font-size:12px; }
 }
 </style>
 </head>
@@ -196,7 +220,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
         <div class="hero-inner">
             <div class="hero-badge">🎵 DIAGRAM TO MUSIC</div>
             <h1 class="hero-title">上传图片，AI 为你写歌</h1>
-            <p class="hero-desc">上传思维导图、流程图或思维笔记 — 把梳理好的思路，变成听得见的旋律</p>
+            <p class="hero-desc">上传思维导图、流程图或思维笔记<br>让 AI 理解你的想法，把梳理好的内容变成一首专属旋律。</p>
             <div class="hero-flow">
                 <div class="hero-step">
                     <div class="hero-step-icon">📸</div>
@@ -213,6 +237,16 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                     <div class="hero-step-label">听歌</div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="card cases-section">
+        <div class="card-header">
+            <div class="card-icon pink">✨</div>
+            <div><h3>精选案例</h3><p>先听听已有的 AI 生成歌曲</p></div>
+        </div>
+        <div class="card-body">
+            <div class="cases-grid" id="casesGrid"></div>
         </div>
     </div>
 
@@ -331,6 +365,13 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                         <audio id="audioEl" controls></audio>
                     </div>
                     <a class="btn btn-primary download-btn" id="downloadLink" href="javascript:void(0)" onclick="return handleDownload()">📥 下载歌曲</a>
+                    <div class="share-box" id="shareBox" style="display:none;">
+                        <div class="share-label">分享链接</div>
+                        <div class="share-row">
+                            <input type="text" id="shareInput" readonly>
+                            <button onclick="copyShareUrl()">复制</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -363,6 +404,7 @@ var selectedImgType = '图表';
 var selectedMusicStyle = '';
 var currentMp3Url = null;
 var forceMode = false;
+var currentSongId = null;
 var STYLE_NAMES = {pop:'流行',ancient:'古风',folk:'民谣',electronic:'电子',rock:'摇滚',hiphop:'嘻哈',rnb:'R&B',jazz:'爵士',lofi:'治愈'};
 
 // ===== 样例数据 =====
@@ -464,11 +506,13 @@ function showPreview(dataUrl, viewUrl) {
 
 function resetAll() {
     imageDataUrl = null;
+    currentSongId = null;
     document.getElementById('previewImg').src = '';
     document.getElementById('previewWrap').style.display = 'none';
     document.getElementById('generateBtn').disabled = true;
     document.getElementById('sampleSection').classList.remove('muted');
     document.getElementById('viewLink').style.display = 'none';
+    document.getElementById('shareBox').style.display = 'none';
     fileInput.value = '';
     forceMode = false;
 }
@@ -587,6 +631,7 @@ async function doGenerate() {
         document.getElementById('audioPlayer').style.display = 'block';
         document.getElementById('audioEl').src = d.mp3_url;
         currentMp3Url = d.mp3_url;
+        currentSongId = d.song_id || null;
         document.getElementById('songTitle').textContent = d.title || 'AI 创作歌曲';
         var tagsEl = document.getElementById('songTags');
         tagsEl.innerHTML = '';
@@ -595,6 +640,14 @@ async function doGenerate() {
         tag.className = 'song-tag';
         tag.textContent = tagName;
         tagsEl.appendChild(tag);
+
+        // 分享链接
+        if (currentSongId) {
+            var shareBox = document.getElementById('shareBox');
+            var shareInput = document.getElementById('shareInput');
+            shareInput.value = window.location.origin + '/result/' + currentSongId;
+            shareBox.style.display = 'block';
+        }
 
         generateWaveform();
         updateDuration();
@@ -667,7 +720,7 @@ function renderLyrics(text) {
 }
 
 function handleDownload() {
-    if (!currentMp3Url) return false;
+    if (!currentSongId && !currentMp3Url) return false;
     var isWechat = /MicroMessenger/i.test(navigator.userAgent);
     if (isWechat) {
         alert('微信内无法直接下载音频，请点击右上角「⋯」→「在浏览器打开」，然后在浏览器中点击下载');
@@ -681,9 +734,66 @@ function handleDownload() {
         btn.textContent = originalText;
         btn.classList.remove('disabled');
     }, 1500);
-    window.location.href = '/api/song/download?url=' + encodeURIComponent(currentMp3Url) + '&filename=' + encodeURIComponent((document.getElementById('songTitle').textContent || 'AI歌曲') + '.mp3');
+    if (currentSongId) {
+        window.location.href = '/download/' + currentSongId;
+    } else {
+        window.location.href = '/api/song/download?url=' + encodeURIComponent(currentMp3Url) + '&filename=' + encodeURIComponent((document.getElementById('songTitle').textContent || 'AI歌曲') + '.mp3');
+    }
     return false;
 }
+
+function copyShareUrl() {
+    var input = document.getElementById('shareInput');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value).then(function() {
+        var btn = event.target;
+        var original = btn.textContent;
+        btn.textContent = '已复制';
+        setTimeout(function() { btn.textContent = original; }, 1500);
+    });
+}
+
+function loadCases() {
+    fetch('/api/cases').then(function(r){ return r.json(); }).then(function(data){
+        var grid = document.getElementById('casesGrid');
+        if (!data.cases || !data.cases.length) {
+            grid.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px 0;width:100%;">暂无精选案例</div>';
+            return;
+        }
+        data.cases.forEach(function(c){
+            var card = document.createElement('div');
+            card.className = 'case-card';
+            card.innerHTML =
+                '<img class="case-thumb" src="' + c.image + '" alt="' + c.title + '">' +
+                '<div class="case-info">' +
+                    '<div class="case-title">' + c.title + '</div>' +
+                    '<div class="case-meta">' +
+                        '<span class="case-tag">' + (c.style_name || c.style) + '</span>' +
+                        '<span class="case-play">▶ 播放</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="case-player" id="casePlayer-' + c.id + '">' +
+                    '<audio controls src="' + c.audio + '"></audio>' +
+                '</div>';
+            card.onclick = function(e) {
+                if (e.target.tagName === 'AUDIO') return;
+                var player = document.getElementById('casePlayer-' + c.id);
+                var wasOpen = player.classList.contains('show');
+                document.querySelectorAll('.case-player').forEach(function(p){ p.classList.remove('show'); var a = p.querySelector('audio'); if (a) a.pause(); });
+                if (!wasOpen) {
+                    player.classList.add('show');
+                    player.querySelector('audio').play();
+                }
+            };
+            grid.appendChild(card);
+        });
+    }).catch(function(){
+        document.getElementById('casesGrid').innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px 0;width:100%;">案例加载失败</div>';
+    });
+}
+
+loadCases();
 
 function generateWaveform() {
     var container = document.getElementById('waveform');

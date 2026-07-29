@@ -5,9 +5,13 @@
 
 import os
 import base64
+import json
 import time
+import uuid
 import requests
-from flask import Flask, request, jsonify, render_template
+from pathlib import Path
+from datetime import datetime
+from flask import Flask, request, jsonify, render_template, send_file, abort
 
 # PythonAnywhere 免费版代理配置（仅 PythonAnywhere 环境启用）
 _session = requests.Session()
@@ -42,6 +46,86 @@ STYLE_PROMPTS = {
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB
+
+RESULTS_DIR = Path(__file__).parent / "results"
+CASES_DIR = Path(__file__).parent / "static" / "cases"
+
+
+def _ensure_dirs():
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    CASES_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _generate_song_id():
+    return datetime.now().strftime("%Y%m%d") + "-" + uuid.uuid4().hex[:8]
+
+
+def _save_result(image_bytes: bytes, ext: str, lyrics: str, title: str, style: str, style_name: str, audio_bytes: bytes) -> str:
+    song_id = _generate_song_id()
+    result_dir = RESULTS_DIR / song_id
+    result_dir.mkdir(parents=True, exist_ok=False)
+
+    image_path = result_dir / f"image.{ext}"
+    with open(image_path, "wb") as f:
+        f.write(image_bytes)
+
+    audio_path = result_dir / "audio.mp3"
+    with open(audio_path, "wb") as f:
+        f.write(audio_bytes)
+
+    lyrics_path = result_dir / "lyrics.txt"
+    with open(lyrics_path, "w", encoding="utf-8") as f:
+        f.write(lyrics)
+
+    meta = {
+        "id": song_id,
+        "title": title,
+        "style": style,
+        "style_name": style_name,
+        "created_at": datetime.now().isoformat(),
+    }
+    with open(result_dir / "meta.json", "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+
+    return song_id
+
+
+def _load_result(song_id: str):
+    result_dir = RESULTS_DIR / song_id
+    if not result_dir.exists():
+        return None
+
+    meta_path = result_dir / "meta.json"
+    lyrics_path = result_dir / "lyrics.txt"
+    audio_path = result_dir / "audio.mp3"
+    if not meta_path.exists() or not lyrics_path.exists() or not audio_path.exists():
+        return None
+
+    image_files = list(result_dir.glob("image.*"))
+    image_ext = image_files[0].suffix.lstrip(".") if image_files else "png"
+
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta = json.load(f)
+    with open(lyrics_path, "r", encoding="utf-8") as f:
+        lyrics = f.read()
+
+    return {"meta": meta, "lyrics": lyrics, "image_ext": image_ext}
+
+
+def _download_audio(url: str) -> bytes:
+    resp = _session.get(url, timeout=60)
+    resp.raise_for_status()
+    return resp.content
+
+
+STYLE_NAME_MAP = {
+    "pop": "流行", "ancient": "古风", "folk": "民谣",
+    "electronic": "电子", "rock": "摇滚", "hiphop": "嘻哈",
+    "rnb": "R&B", "jazz": "爵士", "lofi": "治愈",
+}
+
+
+_ensure_dirs()
 
 
 # ============ 智谱 AI：图片识别 + 歌词生成 ============
@@ -206,7 +290,7 @@ def validate_image():
         "messages": [{
             "role": "user",
             "content": [
-                {"type": "text", "text": "请判断这张图片，严格按如下格式回答（不要其他内容）：\nSAFE:YES或NO（图片是否包含色情、暴力、政治敏感等违规内容，有违规内容则NO，无则YES）\nDIAGRAM:YES或NO（图片是否是思维导图、流程图、思维笔记、组织结构图、UML图等结构化图表，是则YES，纯照片/风景照/自拍则NO）"},
+                {"type": "text", "text": "请判断这张图片，严格按如下格式回答（不要其他内容）：\nSAFE:YES或NO（图片是否包含色情、暴力、血腥、政治敏感等违规内容，有违规内容则NO，无则YES）\nDIAGRAM:YES或NO（图片是否属于思维导图、流程图、思维笔记、组织结构图、UML图、白板整理、手绘笔记、结构化笔记等可视化内容，是则YES；纯风景照、自拍、美食、宠物、表情包、商品图等明显无关图片则NO）"},
                 {"type": "image_url", "image_url": {"url": img_data_url}},
             ],
         }],
@@ -236,6 +320,74 @@ def validate_image():
 @app.route("/test")
 def test_page():
     return render_template("test.html")
+
+
+@app.route("/api/cases")
+def get_cases():
+    """返回精选案例配置"""
+    cases_file = CASES_DIR / "cases.json"
+    if cases_file.exists():
+        with open(cases_file, "r", encoding="utf-8") as f:
+            return jsonify(json.load(f))
+    return jsonify({"cases": []})
+
+
+@app.route("/result/<song_id>")
+def result_page(song_id):
+    """结果展示页（可分享）"""
+    result = _load_result(song_id)
+    if not result:
+        return render_template("result.html", not_found=True), 404
+    return render_template(
+        "result.html",
+        not_found=False,
+        song_id=song_id,
+        title=result["meta"]["title"],
+        style=result["meta"]["style"],
+        style_name=result["meta"]["style_name"],
+        lyrics=result["lyrics"],
+        created_at=result["meta"]["created_at"],
+    )
+
+
+@app.route("/api/image/<song_id>")
+def get_result_image(song_id):
+    """获取结果图片"""
+    result_dir = RESULTS_DIR / song_id
+    if not result_dir.exists():
+        return jsonify({"error": "not found"}), 404
+    image_files = list(result_dir.glob("image.*"))
+    if not image_files:
+        return jsonify({"error": "image not found"}), 404
+    ext = image_files[0].suffix.lstrip(".")
+    mimetype = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "webp": "image/webp", "gif": "image/gif"}.get(ext, "image/jpeg")
+    return send_file(image_files[0], mimetype=mimetype)
+
+
+@app.route("/api/audio/<song_id>")
+def get_result_audio(song_id):
+    """获取结果音频（在线播放）"""
+    audio_path = RESULTS_DIR / song_id / "audio.mp3"
+    if not audio_path.exists():
+        return jsonify({"error": "audio not found"}), 404
+    return send_file(audio_path, mimetype="audio/mpeg")
+
+
+@app.route("/download/<song_id>")
+def download_result(song_id):
+    """下载结果音频"""
+    result = _load_result(song_id)
+    if not result:
+        return jsonify({"error": "not found"}), 404
+    audio_path = RESULTS_DIR / song_id / "audio.mp3"
+    title = result["meta"]["title"]
+    filename = f"{title}.mp3".replace("\\", "_").replace("/", "_").replace("..", "_")
+    return send_file(
+        audio_path,
+        mimetype="audio/mpeg",
+        as_attachment=True,
+        download_name=filename,
+    )
 
 @app.after_request
 def add_no_cache(response):
@@ -275,12 +427,19 @@ def create_song():
         # Step 2: MiniMax 同步生成歌曲
         music_result = minimax_generate(ai_result["lyrics"], ai_result["title"], ai_result["style_prompt"])
 
+        # Step 3: 下载音频并保存到本地（MiniMax URL 24h 过期）
+        audio_bytes = _download_audio(music_result["audio_url"])
+        style_name = STYLE_NAME_MAP.get(music_style_tag, music_style_tag)
+        song_id = _save_result(img_bytes, ext, ai_result["lyrics"], ai_result["title"], music_style_tag, style_name, audio_bytes)
+
         return jsonify({
             "status": "done",
+            "song_id": song_id,
+            "redirect_url": f"/result/{song_id}",
             "title": ai_result["title"],
             "summary": ai_result["summary"],
             "lyrics": ai_result["lyrics"],
-            "mp3_url": music_result["audio_url"],
+            "mp3_url": f"/api/audio/{song_id}",
             "duration": music_result["duration"],
             "trace_id": music_result.get("trace_id", ""),
         })

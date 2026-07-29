@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "id": "journey",
+      "title": "心路历程",
+      "style": "rock",
+      "style_name": "摇滚",
+      "image": "/static/cases/case_journey.jpg",
+      "audio": "/static/cases/case_journey.mp3"
+    }
+  ]
+}
