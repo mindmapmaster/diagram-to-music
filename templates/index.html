@@ -134,7 +134,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
         <div class="hero-inner">
             <div class="hero-badge">🎵 DIAGRAM TO MUSIC</div>
             <h1 class="hero-title">上传图片，AI 为你写歌</h1>
-            <p class="hero-desc">把梳理好的思路，变成听得见的旋律</p>
+            <p class="hero-desc">上传思维导图、流程图或思维笔记 — 把梳理好的思路，变成听得见的旋律</p>
             <div class="hero-flow">
                 <div class="hero-step">
                     <div class="hero-step-icon">📸</div>
@@ -268,8 +268,8 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 <div class="modal-overlay" id="validateModal">
     <div class="modal-box">
         <div class="modal-icon">🤔</div>
-        <div class="modal-title">图片看起来不是图表类内容</div>
-        <div class="modal-desc" id="validateMsg">建议上传思维导图、流程图或思维笔记截图，识别效果最佳。</div>
+        <div class="modal-title">上传的图片需要是思维导图、流程图或思维笔记哦~</div>
+        <div class="modal-desc" id="validateMsg">识别效果最佳的是思维导图、流程图、思维笔记截图</div>
         <div class="modal-actions">
             <button class="btn btn-primary" onclick="forceGenerate()">🎵 仍然生成</button>
             <button class="btn btn-ghost" onclick="closeModal()">取消</button>
@@ -347,8 +347,32 @@ function readAndShow(file) {
     reader.onload = function(e) {
         imageDataUrl = e.target.result;
         showPreview(imageDataUrl, null);
+        forceMode = false;
+        validateOnUpload();
     };
     reader.readAsDataURL(file);
+}
+
+async function validateOnUpload() {
+    try {
+        var resp = await fetch(imageDataUrl);
+        var blob = await resp.blob();
+        var fd = new FormData();
+        fd.append('image', blob, 'upload.png');
+        var r = await fetch('/api/validate', {method:'POST', body:fd});
+        var d = await r.json();
+        if (d.safe === false) {
+            resetAll();
+            showError('图片包含违规内容，无法上传');
+            return;
+        }
+        if (d.is_diagram === false) {
+            document.getElementById('validateModal').style.display = 'flex';
+            return;
+        }
+    } catch(err) {
+        // 校验失败，放过不阻塞
+    }
 }
 
 function showPreview(dataUrl, viewUrl) {
@@ -417,26 +441,6 @@ function startGenerate() {
     if (!imageDataUrl) { showError('请先上传图片或选择样例'); return; }
     if (!selectedMusicStyle) { showError('请选择一种曲风'); return; }
     hideError();
-
-    if (!forceMode) {
-        validateThenGenerate();
-        return;
-    }
-    doGenerate();
-}
-
-async function validateThenGenerate() {
-    var resp = await fetch(imageDataUrl);
-    var blob = await resp.blob();
-    var fd = new FormData();
-    fd.append('image', blob, 'upload.png');
-    var r = await fetch('/api/validate', {method:'POST', body:fd});
-    var d = await r.json();
-    if (!d.valid) {
-        document.getElementById('validateMsg').textContent = d.reason || '建议上传思维导图、流程图或思维笔记截图';
-        document.getElementById('validateModal').style.display = 'flex';
-        return;
-    }
     doGenerate();
 }
 
@@ -518,8 +522,33 @@ function renderLyrics(text) {
     }
 }
 
-function downloadSong() {
-    if (currentMp3Url) window.open('/api/song/download?url=' + encodeURIComponent(currentMp3Url), '_blank');
+async function downloadSong() {
+    if (!currentMp3Url) return;
+    var btn = document.querySelector('.download-link');
+    if (!btn) return;
+    var originalText = btn.textContent;
+    btn.textContent = '⏳ 下载中...';
+    try {
+        var resp = await fetch('/api/song/download?url=' + encodeURIComponent(currentMp3Url));
+        var blob = await resp.blob();
+        var file = new File([blob], 'AI歌曲.mp3', {type: 'audio/mpeg'});
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: '我生成的AI歌曲' });
+        } else {
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'AI歌曲.mp3';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        }
+    } catch(err) {
+        if (err.name !== 'AbortError') alert('下载失败：' + err.message);
+    } finally {
+        btn.textContent = originalText;
+    }
 }
 
 fetch('/api/health').then(function(r) { return r.json(); }).then(function(d) {

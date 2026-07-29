@@ -9,9 +9,9 @@ import time
 import requests
 from flask import Flask, request, jsonify, render_template
 
-# PythonAnywhere 免费版代理配置
+# PythonAnywhere 免费版代理配置（仅 PythonAnywhere 环境启用）
 _session = requests.Session()
-if "PYTHONANYWHERE_DOMAIN" in os.environ or os.path.exists("/home"):
+if "PYTHONANYWHERE_DOMAIN" in os.environ:
     _session.proxies = {
         "http": "http://proxy.server:3128",
         "https": "http://proxy.server:3128",
@@ -185,7 +185,7 @@ def minimax_generate(lyrics: str, title: str, style_prompt: str) -> dict:
 
 @app.route("/api/validate", methods=["POST"])
 def validate_image():
-    """快速判断图片是否为思维导图/流程图/笔记"""
+    """上传时校验：1.安全检测(色情/暴力/敏感) 2.是否为思维导图/流程图/思维笔记"""
     if "image" not in request.files:
         return jsonify({"error": "请上传图片"}), 400
 
@@ -199,18 +199,18 @@ def validate_image():
     img_data_url = f"data:image/{ext};base64,{img_b64}"
 
     if not ZHIPU_API_KEY:
-        return jsonify({"valid": True})  # 没配置就放过
+        return jsonify({"safe": True, "is_diagram": True})
 
     payload = {
         "model": ZHIPU_MODEL,
         "messages": [{
             "role": "user",
             "content": [
-                {"type": "text", "text": "这张图片是否包含文字、图形、结构化信息（如思维导图、流程图、笔记、图表、树状图、关系图、白板内容等）？只要图片中有文字或结构化可视内容就回答YES，如果是纯风景照或人脸照片才回答NO。只回答YES或NO。"},
+                {"type": "text", "text": "请判断这张图片，严格按如下格式回答（不要其他内容）：\nSAFE:YES或NO（图片是否包含色情、暴力、政治敏感等违规内容，有违规内容则NO，无则YES）\nDIAGRAM:YES或NO（图片是否是思维导图、流程图、思维笔记、组织结构图、UML图等结构化图表，是则YES，纯照片/风景照/自拍则NO）"},
                 {"type": "image_url", "image_url": {"url": img_data_url}},
             ],
         }],
-        "max_tokens": 10,
+        "max_tokens": 20,
         "temperature": 0,
     }
 
@@ -224,11 +224,13 @@ def validate_image():
         data = resp.json()
         if "choices" in data:
             answer = data["choices"][0]["message"]["content"].strip().upper()
-            return jsonify({"valid": "YES" in answer})
+            safe = "SAFE:YES" in answer or "SAFE: YES" in answer
+            is_diagram = "DIAGRAM:YES" in answer or "DIAGRAM: YES" in answer
+            return jsonify({"safe": safe, "is_diagram": is_diagram})
     except Exception:
         pass
 
-    return jsonify({"valid": True})  # 校验失败也放过，不阻塞用户
+    return jsonify({"safe": True, "is_diagram": True})
 
 
 @app.route("/test")
