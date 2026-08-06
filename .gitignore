@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+.env
 _song_cache/
 results/
 tunnel_log.txt
