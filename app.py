@@ -241,11 +241,22 @@ def call_zhipu(image_base64: str, img_type: str, music_style_tag: str) -> dict:
     # 解析：摘要<sep>歌名<sep>歌词...<style_prompt>...</style_prompt>
     parts = content.split("<sep>")
 
-    summary = parts[0].strip() if len(parts) > 0 else ""
-    title = parts[1].strip() if len(parts) > 1 else "AI 创作歌曲"
-
-    # 歌词部分：可能是 parts[2] 直到 <style_prompt> 之前
-    raw_lyrics = parts[2] if len(parts) > 2 else content
+    if len(parts) < 3:
+        # 智谱有时不按 <sep> 输出，改用中文标签兜底匹配
+        sm = re.search(r'摘要[：:]\s*(.+?)(?:\n|歌名)', content, re.DOTALL)
+        tm = re.search(r'歌名[：:]\s*(.+?)(?:\n)', content)
+        summary = sm.group(1).strip() if sm else ""
+        title = tm.group(1).strip() if tm else (parts[1].strip() if len(parts) > 1 else "AI 创作歌曲")
+        # 歌词：从"歌名"行之后到 <style_prompt> 或末尾
+        if tm:
+            lyrics_start = tm.end()
+            raw_lyrics = content[lyrics_start:].strip()
+        else:
+            raw_lyrics = content
+    else:
+        summary = parts[0].strip()
+        title = parts[1].strip()
+        raw_lyrics = parts[2]
 
     # 提取 <style_prompt>...</style_prompt>
     ai_style_prompt = music_style_en
