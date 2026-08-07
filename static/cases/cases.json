@@ -1,12 +1,31 @@
 {
   "cases": [
     {
-      "id": "journey",
-      "title": "心路历程",
-      "style": "rock",
-      "style_name": "摇滚",
-      "image": "/static/cases/case_journey.jpg",
-      "audio": "/static/cases/case_journey.mp3"
+      "id": "mindmap_time",
+      "title": "找到可以穿越时间的事",
+      "style": "pop",
+      "style_name": "流行",
+      "image": "/static/cases/case_mindmap.png",
+      "audio": "/static/cases/case_journey.mp3",
+      "link": "https://mp.weixin.qq.com/s/DgWTyYRdF0LBWYa8LJx4uw"
+    },
+    {
+      "id": "career_plan",
+      "title": "职业规划：从积累到选择",
+      "style": "folk",
+      "style_name": "民谣",
+      "image": "/static/cases/case_flowchart.png",
+      "audio": "/static/cases/case_journey.mp3",
+      "link": "https://weibo.com/5261481243/5137878430515201"
+    },
+    {
+      "id": "offer_checklist",
+      "title": "Offer选择要素清单",
+      "style": "lofi",
+      "style_name": "治愈",
+      "image": "/static/cases/case_notes.png",
+      "audio": "/static/cases/case_journey.mp3",
+      "link": "http://xhslink.cn/o/4FE1bu6Zgio"
     }
   ]
 }

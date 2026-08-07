@@ -152,7 +152,11 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 .case-play-btn { background:none; border:1px solid var(--card-border); color:var(--text-secondary); font-size:12px; padding:6px 14px; border-radius:8px; cursor:pointer; transition:var(--transition); flex-shrink:0; }
 .case-play-btn:hover { border-color:var(--primary); color:var(--primary); }
 .case-play-btn.playing { background:var(--primary); color:white; border-color:var(--primary); }
-.case-audio { padding:0 10px 10px; display:none; }
+/* Case link */
+.case-link-row { padding:0 10px 8px; }
+.case-link { font-size:11px; color:#A78BFA; text-decoration:none; display:inline-flex; align-items:center; gap:4px; }
+.case-link:hover { text-decoration:underline; }
+.case-link::after { content:'→'; font-size:10px; }
 .case-audio.show { display:block; }
 .case-audio audio { width:100%; border-radius:6px; }
 
@@ -840,6 +844,7 @@ function loadCases() {
         data.cases.forEach(function(c){
             var item = document.createElement('div');
             item.className = 'case-item';
+            var linkHtml = c.link ? '<div class="case-link-row"><a class="case-link" href="' + c.link + '" target="_blank">点击查看原文</a></div>' : '';
             item.innerHTML =
                 '<img class="case-thumb" src="' + c.image + '" alt="' + c.title + '" onclick="openLightbox(\'' + c.image + '\')" title="点击查看大图">' +
                 '<div class="case-row">' +
@@ -848,7 +853,7 @@ function loadCases() {
                         '<span class="case-tag">' + (c.style_name || c.style) + '</span>' +
                     '</div>' +
                     '<button class="case-play-btn" id="caseBtn-' + c.id + '" onclick="toggleCasePlay(\'' + c.id + '\')">▶ 播放</button>' +
-                '</div>' +
+                '</div>' + linkHtml +
                 '<div class="case-audio" id="caseAudio-' + c.id + '">' +
                     '<audio controls src="' + c.audio + '" onended="resetCaseBtn(\'' + c.id + '\')"></audio>' +
                 '</div>';
