@@ -135,6 +135,12 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 /* Sample Icons */
 .sample-icon-img { width:32px; height:32px; display:block; margin:0 auto 4px; }
 
+/* Sample showcase cards */
+.sample-showcase { display:block; cursor:pointer; border:1px solid var(--card-border); border-radius:var(--radius-xs); overflow:hidden; transition:var(--transition); background:var(--surface); text-decoration:none; }
+.sample-showcase:hover { border-color:var(--primary); transform:translateY(-1px); }
+.sample-showcase img { width:100%; height:auto; display:block; max-height:140px; object-fit:cover; }
+.sample-showcase .sample-link-text { padding:8px 4px; text-align:center; font-size:11px; color:#A78BFA; font-weight:600; }
+
 /* Cases in preview */
 .cases-in-preview { margin-top:20px; }
 .cases-divider { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
@@ -152,11 +158,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 .case-play-btn { background:none; border:1px solid var(--card-border); color:var(--text-secondary); font-size:12px; padding:6px 14px; border-radius:8px; cursor:pointer; transition:var(--transition); flex-shrink:0; }
 .case-play-btn:hover { border-color:var(--primary); color:var(--primary); }
 .case-play-btn.playing { background:var(--primary); color:white; border-color:var(--primary); }
-/* Case link */
-.case-link-row { padding:0 10px 8px; }
-.case-link { font-size:11px; color:#A78BFA; text-decoration:none; display:inline-flex; align-items:center; gap:4px; }
-.case-link:hover { text-decoration:underline; }
-.case-link::after { content:'→'; font-size:10px; }
+.case-audio { padding:0 10px 10px; display:none; }
 .case-audio.show { display:block; }
 .case-audio audio { width:100%; border-radius:6px; }
 
@@ -285,15 +287,15 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                 <div style="margin-top:10px;" id="sampleSection">
                     <div class="section-label">直接试用</div>
                     <div class="style-grid" style="margin-top:6px;">
-                        <div class="style-card" onclick="loadSample('mindmap')">
-                            <img class="sample-icon-img" src="https://www.processon.com/image/5b76bc5d5bf.svg" alt="思维导图"><span class="style-name">思维导图</span>
-                        </div>
-                        <div class="style-card" onclick="loadSample('flowchart')">
-                            <img class="sample-icon-img" src="https://www.processon.com/image/31156f0c743.svg" alt="流程图"><span class="style-name">流程图</span>
-                        </div>
-                        <div class="style-card" onclick="loadSample('notes')">
-                            <img class="sample-icon-img" src="https://www.processon.com/image/d902fd623f5.svg" alt="思维笔记"><span class="style-name">思维笔记</span>
-                        </div>
+                        <a class="sample-showcase" href="https://mp.weixin.qq.com/s/DgWTyYRdF0LBWYa8LJx4uw" target="_blank">
+                            <img src="/static/cases/case_mindmap.png" alt="思维导图"><div class="sample-link-text">点击查看原文</div>
+                        </a>
+                        <a class="sample-showcase" href="https://weibo.com/5261481243/5137878430515201" target="_blank">
+                            <img src="/static/cases/case_flowchart.png" alt="流程图"><div class="sample-link-text">点击查看原文</div>
+                        </a>
+                        <a class="sample-showcase" href="http://xhslink.cn/o/4FE1bu6Zgio" target="_blank">
+                            <img src="/static/cases/case_notes.png" alt="思维笔记"><div class="sample-link-text">点击查看原文</div>
+                        </a>
                     </div>
                 </div>
 
@@ -844,7 +846,6 @@ function loadCases() {
         data.cases.forEach(function(c){
             var item = document.createElement('div');
             item.className = 'case-item';
-            var linkHtml = c.link ? '<div class="case-link-row"><a class="case-link" href="' + c.link + '" target="_blank">点击查看原文</a></div>' : '';
             item.innerHTML =
                 '<img class="case-thumb" src="' + c.image + '" alt="' + c.title + '" onclick="openLightbox(\'' + c.image + '\')" title="点击查看大图">' +
                 '<div class="case-row">' +
@@ -853,7 +854,7 @@ function loadCases() {
                         '<span class="case-tag">' + (c.style_name || c.style) + '</span>' +
                     '</div>' +
                     '<button class="case-play-btn" id="caseBtn-' + c.id + '" onclick="toggleCasePlay(\'' + c.id + '\')">▶ 播放</button>' +
-                '</div>' + linkHtml +
+                '</div>' +
                 '<div class="case-audio" id="caseAudio-' + c.id + '">' +
                     '<audio controls src="' + c.audio + '" onended="resetCaseBtn(\'' + c.id + '\')"></audio>' +
                 '</div>';
