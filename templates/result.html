@@ -167,7 +167,8 @@ function renderLyrics(text) {
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i].trim();
         if (!line) continue;
-        var sectionMatch = line.match(/^\[(verse|chorus|bridge|outro|intro|pre-chorus|hook)\s*(\d*)\]/i);
+        var sectionMatch = line.match(/^\[(verse|chorus|bridge|outro|intro|pre-chorus|hook)\s*(\d*)\]/i)
+                        || line.match(/^(verse|chorus|bridge|outro|intro|pre-chorus|hook)\s*(\d*)\s*:/i);
         if (sectionMatch) {
             foundSection = true;
             var sectionName = sectionMatch[1].toUpperCase();
