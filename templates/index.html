@@ -135,12 +135,6 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
 /* Sample Icons */
 .sample-icon-img { width:32px; height:32px; display:block; margin:0 auto 4px; }
 
-/* Sample showcase cards */
-.sample-showcase { display:block; cursor:pointer; border:1px solid var(--card-border); border-radius:var(--radius-xs); overflow:hidden; transition:var(--transition); background:var(--surface); text-decoration:none; }
-.sample-showcase:hover { border-color:var(--primary); transform:translateY(-1px); }
-.sample-showcase img { width:100%; height:auto; display:block; max-height:140px; object-fit:cover; }
-.sample-showcase .sample-link-text { padding:8px 4px; text-align:center; font-size:11px; color:#A78BFA; font-weight:600; }
-
 /* Cases in preview */
 .cases-in-preview { margin-top:20px; }
 .cases-divider { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
@@ -281,7 +275,7 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                 <div class="preview-wrap" id="previewWrap" style="display:none;">
                     <img id="previewImg" src="" alt="">
                     <div class="preview-badge">已选择<span class="preview-clear" onclick="resetAll()">✕ 清除</span></div>
-                    <a class="preview-link" id="viewLink" target="_blank" style="display:none;">📎 查看原图</a>
+                    <a class="preview-link" id="viewLink" target="_blank" style="display:none;">📎 点击查看原文</a>
                 </div>
 
                 <div style="margin-top:10px;" id="sampleSection">
@@ -296,17 +290,6 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkM
                         <div class="style-card" onclick="loadSample('notes')">
                             <img class="sample-icon-img" src="https://www.processon.com/image/d902fd623f5.svg" alt="思维笔记"><span class="style-name">思维笔记</span>
                         </div>
-                    </div>
-                    <div class="style-grid" style="margin-top:8px;">
-                        <a class="sample-showcase" href="https://mp.weixin.qq.com/s/DgWTyYRdF0LBWYa8LJx4uw" target="_blank">
-                            <img src="/static/cases/case_mindmap.png" alt="思维导图案例"><div class="sample-link-text">点击查看原文</div>
-                        </a>
-                        <a class="sample-showcase" href="https://weibo.com/5261481243/5137878430515201" target="_blank">
-                            <img src="/static/cases/case_flowchart.png" alt="流程图案例"><div class="sample-link-text">点击查看原文</div>
-                        </a>
-                        <a class="sample-showcase" href="http://xhslink.cn/o/4FE1bu6Zgio" target="_blank">
-                            <img src="/static/cases/case_notes.png" alt="思维笔记案例"><div class="sample-link-text">点击查看原文</div>
-                        </a>
                     </div>
                 </div>
 
@@ -439,8 +422,8 @@ var currentSongId = null;
 var STYLE_NAMES = {pop:'流行',ancient:'古风',folk:'民谣',electronic:'电子',rock:'摇滚',hiphop:'嘻哈',rnb:'R&B',jazz:'爵士',lofi:'治愈'};
 
 // ===== 样例数据 =====
-var SAMPLE_FILES = {mindmap:'/static/sample_mindmap.svg',flowchart:'/static/sample_flowchart.svg',notes:'/static/sample_notes.png'};
-var SAMPLE_VIEWS = {mindmap:'https://www.processon.com/view/695b920c4e3bc00c5538c3ab?utm_source=diagram2music',flowchart:'https://www.processon.com/view/69d761ce50f07d20c7ecb978?utm_source=diagram2music',notes:'https://www.processon.com/view/62f1fcc5f346fb49413cbb96?utm_source=diagram2music'};
+var SAMPLE_FILES = {mindmap:'/static/cases/case_mindmap.png',flowchart:'/static/cases/case_flowchart.png',notes:'/static/cases/case_notes.png'};
+var SAMPLE_VIEWS = {mindmap:'https://mp.weixin.qq.com/s/DgWTyYRdF0LBWYa8LJx4uw',flowchart:'https://weibo.com/5261481243/5137878430515201',notes:'http://xhslink.cn/o/4FE1bu6Zgio'};
 
 function selectStyle(el) {
     var all = document.querySelectorAll('.style-card');
